@@ -33,6 +33,21 @@ export const trackingItemMetadataSchema = z
     vehicleColor: z.string().max(40).optional(),
     driverName: z.string().max(120).optional(),
     driverPhone: z.string().max(30).optional(),
+
+    // --- Expédition / logistique (affiché publiquement, à la manière d'un
+    // transporteur classique : transporteur, mode, référence, itinéraire...) ---
+    carrier: z.string().max(80).optional(), // ex: FedEx, DHL, transporteur interne...
+    shipmentMode: z.string().max(40).optional(), // ex: Route, Maritime, Aérien
+    carrierReferenceNo: z.string().max(80).optional(),
+    paymentMode: z.string().max(60).optional(), // ex: Virement, Paiement à la livraison
+    totalFreight: z.number().nonnegative().max(1_000_000_000).optional(),
+    originCity: z.string().max(120).optional(),
+    destinationCity: z.string().max(120).optional(),
+    expectedDeliveryDate: z.string().max(20).optional(), // ISO date (YYYY-MM-DD)
+    pickupDate: z.string().max(20).optional(),
+    pickupTime: z.string().max(10).optional(),
+    departureTime: z.string().max(10).optional(),
+    comments: z.string().max(500).optional(), // remarque publique (ex: consignes de livraison)
   })
   .partial();
 
@@ -51,6 +66,18 @@ export const PUBLIC_METADATA_FIELDS = [
   'plateNumber',
   'vehicleModel',
   'vehicleColor',
+  'carrier',
+  'shipmentMode',
+  'carrierReferenceNo',
+  'paymentMode',
+  'totalFreight',
+  'originCity',
+  'destinationCity',
+  'expectedDeliveryDate',
+  'pickupDate',
+  'pickupTime',
+  'departureTime',
+  'comments',
 ] as const;
 
 export function toPublicMetadata(metadata: unknown): Partial<TrackingItemMetadata> {

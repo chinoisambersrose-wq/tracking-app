@@ -24,7 +24,22 @@ interface TrackingItemMetadata {
   vehicleColor?: string;
   driverName?: string;
   driverPhone?: string;
+  carrier?: string;
+  shipmentMode?: string;
+  carrierReferenceNo?: string;
+  paymentMode?: string;
+  totalFreight?: number;
+  originCity?: string;
+  destinationCity?: string;
+  expectedDeliveryDate?: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  departureTime?: string;
+  comments?: string;
 }
+
+const SHIPMENT_MODES = ['Route', 'Maritime', 'Aérien'];
+const PAYMENT_MODES = ['Virement bancaire', 'Paiement à la livraison', 'Carte bancaire', 'Espèces', 'Mobile money'];
 
 interface TrackingItem {
   id: string;
@@ -61,15 +76,75 @@ const PARCEL_CATEGORIES = [
  * (`name=`) correspondent aux clés attendues par le backend (voir
  * backend/src/tracking-items/dto/tracking-item-metadata.schema.ts).
  */
+/** Champs d'expédition communs (transporteur, mode, référence, dates...), affichés pour PARCEL et VEHICLE. */
+function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
+  return (
+    <div className="space-y-2 border-t border-dashed pt-2">
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Informations d'expédition</p>
+      <div className="grid grid-cols-3 gap-2">
+        <input name="carrier" defaultValue={defaults?.carrier} placeholder="Transporteur" className="rounded border px-2 py-1.5 text-sm" />
+        <select name="shipmentMode" defaultValue={defaults?.shipmentMode ?? ''} className="rounded border px-2 py-1.5 text-sm">
+          <option value="">Mode d'expédition…</option>
+          {SHIPMENT_MODES.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <input name="carrierReferenceNo" defaultValue={defaults?.carrierReferenceNo} placeholder="Référence transporteur" className="rounded border px-2 py-1.5 text-sm" />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <select name="paymentMode" defaultValue={defaults?.paymentMode ?? ''} className="rounded border px-2 py-1.5 text-sm">
+          <option value="">Mode de paiement…</option>
+          {PAYMENT_MODES.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <input
+          name="totalFreight"
+          type="number"
+          step="0.01"
+          min={0}
+          defaultValue={defaults?.totalFreight}
+          placeholder="Frais totaux"
+          className="rounded border px-2 py-1.5 text-sm"
+        />
+        <input name="expectedDeliveryDate" type="date" defaultValue={defaults?.expectedDeliveryDate} className="rounded border px-2 py-1.5 text-sm" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input name="originCity" defaultValue={defaults?.originCity} placeholder="Ville d'origine" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="destinationCity" defaultValue={defaults?.destinationCity} placeholder="Ville de destination" className="rounded border px-2 py-1.5 text-sm" />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <input name="pickupDate" type="date" defaultValue={defaults?.pickupDate} className="rounded border px-2 py-1.5 text-sm" title="Date de ramassage" />
+        <input name="pickupTime" type="time" defaultValue={defaults?.pickupTime} className="rounded border px-2 py-1.5 text-sm" title="Heure de ramassage" />
+        <input name="departureTime" type="time" defaultValue={defaults?.departureTime} className="rounded border px-2 py-1.5 text-sm" title="Heure de départ" />
+      </div>
+      <textarea
+        name="comments"
+        defaultValue={defaults?.comments}
+        placeholder="Commentaires / consignes de livraison (visible publiquement)"
+        rows={2}
+        className="w-full rounded border px-2 py-1.5 text-sm"
+      />
+    </div>
+  );
+}
+
 function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaults?: TrackingItemMetadata }) {
   if (type === 'VEHICLE') {
     return (
-      <div className="grid grid-cols-2 gap-2">
-        <input name="plateNumber" defaultValue={defaults?.plateNumber} placeholder="Plaque d'immatriculation" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="vehicleModel" defaultValue={defaults?.vehicleModel} placeholder="Modèle" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="vehicleColor" defaultValue={defaults?.vehicleColor} placeholder="Couleur" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="driverName" defaultValue={defaults?.driverName} placeholder="Nom du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="driverPhone" defaultValue={defaults?.driverPhone} placeholder="Téléphone du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <input name="plateNumber" defaultValue={defaults?.plateNumber} placeholder="Plaque d'immatriculation" className="rounded border px-2 py-1.5 text-sm" />
+          <input name="vehicleModel" defaultValue={defaults?.vehicleModel} placeholder="Modèle" className="rounded border px-2 py-1.5 text-sm" />
+          <input name="vehicleColor" defaultValue={defaults?.vehicleColor} placeholder="Couleur" className="rounded border px-2 py-1.5 text-sm" />
+          <input name="driverName" defaultValue={defaults?.driverName} placeholder="Nom du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
+          <input name="driverPhone" defaultValue={defaults?.driverPhone} placeholder="Téléphone du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
+        </div>
+        <ShipmentFields defaults={defaults} />
       </div>
     );
   }
@@ -132,6 +207,7 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
           className="col-span-2 rounded border px-2 py-1.5 text-sm"
         />
       </div>
+      <ShipmentFields defaults={defaults} />
     </div>
   );
 }
@@ -165,6 +241,18 @@ function readMetadataFromForm(form: FormData): TrackingItemMetadata {
   str('vehicleColor');
   str('driverName');
   str('driverPhone');
+  str('carrier');
+  str('shipmentMode');
+  str('carrierReferenceNo');
+  str('paymentMode');
+  num('totalFreight');
+  str('originCity');
+  str('destinationCity');
+  str('expectedDeliveryDate');
+  str('pickupDate');
+  str('pickupTime');
+  str('departureTime');
+  str('comments');
   metadata.fragile = form.get('fragile') === 'on';
 
   return metadata;
