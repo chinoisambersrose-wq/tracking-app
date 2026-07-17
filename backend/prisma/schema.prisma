@@ -1,0 +1,230 @@
+// Schéma Prisma — Tracking App
+// PostgreSQL + extension PostGIS (activée dans la migration 0_init, voir migration.sql)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  AGENT
+}
+
+enum UserStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  SUSPENDED
+}
+
+enum TrackingMode {
+  PARCEL
+  GPS
+  BOTH
+}
+
+enum TrackingItemType {
+  PARCEL
+  VEHICLE
+}
+
+enum TrialStatus {
+  ACTIVE
+  EXPIRED
+  EXTENDED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  IN_APP
+}
+
+model Organization {
+  id           String       @id @default(uuid())
+  name         String
+  trackingMode TrackingMode @default(PARCEL)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  users         User[]
+  trackingItems TrackingItem[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  fullName     String
+  role         UserRole
+  status       UserStatus @default(ACTIVE)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdById  String?
+  createdBy    User?  @relation("UserCreatedBy", fields: [createdById], references: [id])
+  createdUsers User[] @relation("UserCreatedBy")
+
+  trialPeriod    TrialPeriod?
+  refreshTokens  RefreshToken[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]              @relation("AuditLogActor")
+  assignedItems  TrackingItem[]          @relation("AssignedAgent")
+  statusChanges  TrackingStatusHistory[] @relation("StatusChangedBy")
+  extendedTrials TrialPeriod[]           @relation("TrialExtendedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model TrialPeriod {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  durationDays Int
+  startDate    DateTime    @default(now())
+  endDate      DateTime
+  status       TrialStatus @default(ACTIVE)
+
+  extendedById String?
+  extendedBy   User?     @relation("TrialExtendedBy", fields: [extendedById], references: [id])
+  extendedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("trial_periods")
+}
+
+model TrackingItem {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  type          TrackingItemType
+  publicCode    String           @unique
+  label         String?
+  currentStatus String
+
+  assignedAgentId String?
+  assignedAgent   User?   @relation("AssignedAgent", fields: [assignedAgentId], references: [id])
+
+  metadata Json?
+
+  statusHistory TrackingStatusHistory[]
+  positions     Position[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([publicCode])
+  @@map("tracking_items")
+}
+
+model TrackingStatusHistory {
+  id             String       @id @default(uuid())
+  trackingItemId String
+  trackingItem   TrackingItem @relation(fields: [trackingItemId], references: [id])
+
+  status String
+  note   String?
+
+  changedById String?
+  changedBy   User?   @relation("StatusChangedBy", fields: [changedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([trackingItemId])
+  @@map("tracking_status_history")
+}
+
+model Position {
+  id             String       @id @default(uuid())
+  trackingItemId String
+  trackingItem   TrackingItem @relation(fields: [trackingItemId], references: [id])
+
+  agentId String?
+
+  latitude  Float
+  longitude Float
+  speed     Float?
+  heading   Float?
+  accuracy  Float?
+
+  // Colonne géographique PostGIS ajoutée en migration SQL brute :
+  // ALTER TABLE positions ADD COLUMN geog geography(Point, 4326)
+  //   GENERATED ALWAYS AS (ST_MakePoint(longitude, latitude)::geography) STORED;
+  // CREATE INDEX positions_geog_idx ON positions USING GIST (geog);
+
+  recordedAt DateTime @default(now())
+
+  @@index([trackingItemId, recordedAt])
+  @@map("positions")
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  channel NotificationChannel
+  type    String
+  title   String
+  content String
+
+  readAt DateTime?
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  actorId String?
+  actor   User?   @relation("AuditLogActor", fields: [actorId], references: [id])
+
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+model RefreshToken {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tokenHash String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
