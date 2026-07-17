@@ -1,4 +1,4 @@
-import { PrismaClient, TrackingItemType, TrackingMode } from '@prisma/client';
+import { PrismaClient, Prisma, TrackingItemType, TrackingMode } from '@prisma/client';
 import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -320,7 +320,7 @@ async function main() {
         label: demo.label,
         currentStatus,
         publicCode,
-        metadata: demo.metadata,
+        metadata: demo.metadata as Prisma.InputJsonValue,
       },
     });
 
