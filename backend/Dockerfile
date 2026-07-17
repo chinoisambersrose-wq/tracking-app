@@ -15,6 +15,7 @@ WORKDIR /app
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/prisma ./prisma
-COPY package*.json ./
+COPY --from=base /app/package*.json ./
 EXPOSE 3000
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+
