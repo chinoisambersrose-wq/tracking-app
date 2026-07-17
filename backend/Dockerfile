@@ -8,6 +8,10 @@ RUN npm install
 COPY . .
 RUN npx prisma generate
 RUN npm run build
+# Diagnostic : fait échouer le build explicitement (avec un message clair)
+# si la compilation n'a pas produit dist/main.js, au lieu de laisser une
+# image cassée passer silencieusement.
+RUN ls -la dist && test -f dist/main.js || (echo "ERREUR: dist/main.js absent après npm run build" && exit 1)
 
 FROM node:20-alpine
 RUN apk add --no-cache openssl
