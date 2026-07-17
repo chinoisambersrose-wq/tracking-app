@@ -16,9 +16,12 @@ interface TrackingItemMetadata {
   description?: string;
   senderName?: string;
   senderPhone?: string;
+  senderAddress?: string;
+  senderEmail?: string;
   recipientName?: string;
   recipientPhone?: string;
   recipientAddress?: string;
+  recipientEmail?: string;
   plateNumber?: string;
   vehicleModel?: string;
   vehicleColor?: string;
@@ -195,16 +198,27 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
         rows={2}
         className="w-full rounded border px-2 py-1.5 text-sm"
       />
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+        Expéditeur &amp; destinataire (affichés publiquement sur la page de suivi)
+      </p>
       <div className="grid grid-cols-2 gap-2">
         <input name="senderName" defaultValue={defaults?.senderName} placeholder="Nom de l'expéditeur" className="rounded border px-2 py-1.5 text-sm" />
         <input name="senderPhone" defaultValue={defaults?.senderPhone} placeholder="Téléphone expéditeur" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="senderEmail" type="email" defaultValue={defaults?.senderEmail} placeholder="Email expéditeur" className="rounded border px-2 py-1.5 text-sm" />
+        <input
+          name="senderAddress"
+          defaultValue={defaults?.senderAddress}
+          placeholder="Adresse de l'expéditeur"
+          className="rounded border px-2 py-1.5 text-sm"
+        />
         <input name="recipientName" defaultValue={defaults?.recipientName} placeholder="Nom du destinataire" className="rounded border px-2 py-1.5 text-sm" />
         <input name="recipientPhone" defaultValue={defaults?.recipientPhone} placeholder="Téléphone destinataire" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="recipientEmail" type="email" defaultValue={defaults?.recipientEmail} placeholder="Email destinataire" className="rounded border px-2 py-1.5 text-sm" />
         <input
           name="recipientAddress"
           defaultValue={defaults?.recipientAddress}
           placeholder="Adresse de livraison"
-          className="col-span-2 rounded border px-2 py-1.5 text-sm"
+          className="rounded border px-2 py-1.5 text-sm"
         />
       </div>
       <ShipmentFields defaults={defaults} />
@@ -233,9 +247,12 @@ function readMetadataFromForm(form: FormData): TrackingItemMetadata {
   str('description');
   str('senderName');
   str('senderPhone');
+  str('senderAddress');
+  str('senderEmail');
   str('recipientName');
   str('recipientPhone');
   str('recipientAddress');
+  str('recipientEmail');
   str('plateNumber');
   str('vehicleModel');
   str('vehicleColor');

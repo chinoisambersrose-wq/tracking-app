@@ -4,9 +4,13 @@ import { z } from 'zod';
  * Métadonnées structurées d'un élément de tracking. Les champs pertinents
  * dépendent du type (PARCEL vs VEHICLE) mais on garde un schéma unique et
  * souple : tous les champs sont optionnels, les champs non fournis sont
- * simplement absents. Certains champs (téléphones, adresse) sont considérés
- * sensibles et ne doivent PAS être exposés sur la page de suivi publique
- * (voir public-tracking.controller.ts).
+ * simplement absents.
+ *
+ * Choix produit : à la demande explicite du client, les coordonnées de
+ * l'expéditeur et du destinataire (nom, téléphone, adresse, email) sont
+ * exposées sur la page de suivi publique (voir PUBLIC_METADATA_FIELDS et
+ * public-tracking.controller.ts), à l'image des sites de transporteurs
+ * classiques utilisés comme référence de design.
  */
 export const trackingItemMetadataSchema = z
   .object({
@@ -20,12 +24,16 @@ export const trackingItemMetadataSchema = z
     heightCm: z.number().positive().max(2000).optional(),
     description: z.string().max(500).optional(),
 
-    // --- Contact (sensible, non exposé publiquement) ---
+    // --- Contact expéditeur / destinataire (affiché publiquement, à la
+    // manière d'un transporteur classique type FedEx/DHL) ---
     senderName: z.string().max(120).optional(),
     senderPhone: z.string().max(30).optional(),
+    senderAddress: z.string().max(255).optional(),
+    senderEmail: z.string().max(160).optional(),
     recipientName: z.string().max(120).optional(),
     recipientPhone: z.string().max(30).optional(),
     recipientAddress: z.string().max(255).optional(),
+    recipientEmail: z.string().max(160).optional(),
 
     // --- Véhicule (VEHICLE) ---
     plateNumber: z.string().max(20).optional(),
@@ -66,6 +74,14 @@ export const PUBLIC_METADATA_FIELDS = [
   'plateNumber',
   'vehicleModel',
   'vehicleColor',
+  'senderName',
+  'senderPhone',
+  'senderAddress',
+  'senderEmail',
+  'recipientName',
+  'recipientPhone',
+  'recipientAddress',
+  'recipientEmail',
   'carrier',
   'shipmentMode',
   'carrierReferenceNo',

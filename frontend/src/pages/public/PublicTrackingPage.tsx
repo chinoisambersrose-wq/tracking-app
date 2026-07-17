@@ -23,6 +23,14 @@ interface TrackingDetails {
   plateNumber?: string;
   vehicleModel?: string;
   vehicleColor?: string;
+  senderName?: string;
+  senderPhone?: string;
+  senderAddress?: string;
+  senderEmail?: string;
+  recipientName?: string;
+  recipientPhone?: string;
+  recipientAddress?: string;
+  recipientEmail?: string;
   carrier?: string;
   shipmentMode?: string;
   carrierReferenceNo?: string;
@@ -119,6 +127,10 @@ export default function PublicTrackingPage() {
     d &&
     (d.carrier || d.shipmentMode || d.carrierReferenceNo || d.paymentMode || d.totalFreight || d.originCity || d.destinationCity)
   );
+  const hasSender = !!(d && (d.senderName || d.senderPhone || d.senderAddress || d.senderEmail));
+  const hasRecipient = !!(d && (d.recipientName || d.recipientPhone || d.recipientAddress || d.recipientEmail));
+  const volume = d?.lengthCm && d?.widthCm && d?.heightCm ? (d.lengthCm * d.widthCm * d.heightCm) / 1_000_000 : undefined;
+  const volumetricWeight = d?.lengthCm && d?.widthCm && d?.heightCm ? (d.lengthCm * d.widthCm * d.heightCm) / 5000 : undefined;
 
   return (
     <div className="min-h-full bg-gray-50 text-ink-900">
@@ -197,6 +209,42 @@ export default function PublicTrackingPage() {
               </div>
             </div>
 
+            {/* Shipper / Receiver */}
+            {(hasSender || hasRecipient) && (
+              <div className="grid gap-6 rounded-2xl bg-white p-6 shadow-card sm:grid-cols-2">
+                <div>
+                  <h2 className="mb-3 border-b border-ink-900/10 pb-2 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
+                    Expéditeur
+                  </h2>
+                  {hasSender ? (
+                    <div className="space-y-1 text-sm">
+                      {d?.senderName && <div className="font-semibold">{d.senderName}</div>}
+                      {d?.senderAddress && <div className="text-ink-700/70">{d.senderAddress}</div>}
+                      {d?.senderPhone && <div className="text-ink-700/70">{d.senderPhone}</div>}
+                      {d?.senderEmail && <div className="text-ink-700/70">{d.senderEmail}</div>}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-ink-700/40">Non renseigné</p>
+                  )}
+                </div>
+                <div>
+                  <h2 className="mb-3 border-b border-ink-900/10 pb-2 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
+                    Destinataire
+                  </h2>
+                  {hasRecipient ? (
+                    <div className="space-y-1 text-sm">
+                      {d?.recipientName && <div className="font-semibold">{d.recipientName}</div>}
+                      {d?.recipientAddress && <div className="text-ink-700/70">{d.recipientAddress}</div>}
+                      {d?.recipientPhone && <div className="text-ink-700/70">{d.recipientPhone}</div>}
+                      {d?.recipientEmail && <div className="text-ink-700/70">{d.recipientEmail}</div>}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-ink-700/40">Non renseigné</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Shipment info grid */}
             {hasShipment && (
               <div className="rounded-2xl bg-white p-6 shadow-card">
@@ -206,8 +254,10 @@ export default function PublicTrackingPage() {
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
                   <InfoCell label="Origine" value={d?.originCity} />
                   <InfoCell label="Destination" value={d?.destinationCity} />
+                  <InfoCell label="Type d'envoi" value={result.type === 'VEHICLE' ? 'Véhicule' : 'Colis'} />
                   <InfoCell label="Transporteur" value={d?.carrier} />
                   <InfoCell label="Mode d'expédition" value={d?.shipmentMode} />
+                  <InfoCell label="Poids" value={d?.weightKg !== undefined ? `${d.weightKg} kg` : undefined} />
                   <InfoCell label="Référence transporteur" value={d?.carrierReferenceNo} />
                   <InfoCell label="Mode de paiement" value={d?.paymentMode} />
                   <InfoCell label="Frais totaux" value={d?.totalFreight !== undefined ? `${d.totalFreight}` : undefined} />
@@ -217,7 +267,10 @@ export default function PublicTrackingPage() {
                   <InfoCell label="Heure de départ" value={d?.departureTime} />
                 </dl>
                 {d?.comments && (
-                  <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{d.comments}</p>
+                  <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">
+                    <span className="font-semibold">Commentaires : </span>
+                    {d.comments}
+                  </p>
                 )}
               </div>
             )}
@@ -229,28 +282,39 @@ export default function PublicTrackingPage() {
                   <PackageIcon className="h-4 w-4" /> Détails du colis
                 </h2>
                 <div className="overflow-x-auto px-6 py-4">
-                  <table className="w-full min-w-[480px] text-left text-sm">
+                  <table className="w-full min-w-[600px] text-left text-sm">
                     <thead>
                       <tr className="border-b border-ink-900/10 text-xs uppercase tracking-wide text-ink-700/50">
-                        <th className="py-2 pr-4">Catégorie</th>
+                        <th className="py-2 pr-4">Qté</th>
+                        <th className="py-2 pr-4">Type</th>
                         <th className="py-2 pr-4">Description</th>
-                        <th className="py-2 pr-4">Dimensions (L×l×H cm)</th>
+                        <th className="py-2 pr-4">Long. (cm)</th>
+                        <th className="py-2 pr-4">Larg. (cm)</th>
+                        <th className="py-2 pr-4">Haut. (cm)</th>
                         <th className="py-2 pr-4">Poids</th>
                         <th className="py-2">Valeur déclarée</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
+                        <td className="py-2 pr-4">01</td>
                         <td className="py-2 pr-4">{d?.category ?? '—'}</td>
                         <td className="py-2 pr-4">{d?.description ?? '—'}</td>
-                        <td className="py-2 pr-4">
-                          {d?.lengthCm && d?.widthCm && d?.heightCm ? `${d.lengthCm} × ${d.widthCm} × ${d.heightCm}` : '—'}
-                        </td>
+                        <td className="py-2 pr-4">{d?.lengthCm ?? '—'}</td>
+                        <td className="py-2 pr-4">{d?.widthCm ?? '—'}</td>
+                        <td className="py-2 pr-4">{d?.heightCm ?? '—'}</td>
                         <td className="py-2 pr-4">{d?.weightKg !== undefined ? `${d.weightKg} kg` : '—'}</td>
                         <td className="py-2">{d?.declaredValue !== undefined ? d.declaredValue : '—'}</td>
                       </tr>
                     </tbody>
                   </table>
+                  {(volume !== undefined || volumetricWeight !== undefined) && (
+                    <div className="mt-3 flex flex-wrap gap-x-8 gap-y-1 text-xs text-ink-700/60">
+                      {volumetricWeight !== undefined && <span>Poids volumétrique total : {volumetricWeight.toFixed(2)} kg</span>}
+                      {volume !== undefined && <span>Volume total : {volume.toFixed(2)} m³</span>}
+                      {d?.weightKg !== undefined && <span>Poids réel total : {d.weightKg.toFixed(2)} kg</span>}
+                    </div>
+                  )}
                   {d?.fragile && (
                     <span className="mt-3 inline-block rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
                       ⚠ Colis fragile
@@ -267,29 +331,41 @@ export default function PublicTrackingPage() {
               </div>
             )}
 
-            {/* Timeline */}
-            <div className="rounded-2xl bg-white p-6 shadow-card">
-              <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
-                <ClockIcon className="h-4 w-4" /> Historique
+            {/* Historique */}
+            <div className="overflow-hidden rounded-2xl bg-white shadow-card">
+              <h2 className="flex items-center gap-2 px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
+                <ClockIcon className="h-4 w-4" /> Historique d'expédition
               </h2>
-              <ol className="space-y-0">
-                {result.statusHistory.map((h, idx) => {
-                  const isLast = idx === result.statusHistory.length - 1;
-                  return (
-                    <li key={idx} className="relative flex gap-4 pb-6 last:pb-0">
-                      <div className="flex flex-col items-center">
-                        <span className={`h-3 w-3 shrink-0 rounded-full ${isLast ? 'bg-brand-600' : 'bg-ink-900/20'}`} />
-                        {idx < result.statusHistory.length - 1 && <span className="mt-1 w-px flex-1 bg-ink-900/10" />}
-                      </div>
-                      <div className="-mt-1">
-                        <div className="text-sm font-semibold">{h.status}</div>
-                        <div className="text-xs text-ink-700/50">{new Date(h.createdAt).toLocaleString('fr-FR')}</div>
-                        {h.note && <div className="mt-1 text-sm text-ink-700/70">{h.note}</div>}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
+              <div className="overflow-x-auto px-6 py-4">
+                <table className="w-full min-w-[480px] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-ink-900/10 text-xs uppercase tracking-wide text-ink-700/50">
+                      <th className="py-2 pr-4">Date</th>
+                      <th className="py-2 pr-4">Heure</th>
+                      <th className="py-2 pr-4">Statut</th>
+                      <th className="py-2">Remarque</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.statusHistory.map((h, idx) => {
+                      const dt = new Date(h.createdAt);
+                      const isLast = idx === result.statusHistory.length - 1;
+                      return (
+                        <tr key={idx} className={`border-b border-ink-900/5 last:border-0 ${isLast ? 'font-semibold' : ''}`}>
+                          <td className="py-2 pr-4">{dt.toLocaleDateString('fr-FR')}</td>
+                          <td className="py-2 pr-4">{dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</td>
+                          <td className="py-2 pr-4">
+                            <span className={`inline-block rounded-full px-2 py-0.5 text-xs ${isLast ? `${statusTone(h.status).bg} text-white` : 'bg-ink-900/5 text-ink-700'}`}>
+                              {h.status}
+                            </span>
+                          </td>
+                          <td className="py-2 text-ink-700/70">{h.note ?? '—'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Map */}
