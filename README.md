@@ -84,3 +84,4 @@ Voir `ARCHITECTURE.md` pour le détail des modules backend et de l'organisation 
 - Ajouter le clustering des marqueurs (`react-leaflet-cluster` ou `leaflet.markercluster`) si le volume de points devient important.
 - Configurer HTTPS et des secrets JWT robustes avant tout déploiement public.
 # tracking-app
+# tracking-app
