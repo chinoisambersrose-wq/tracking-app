@@ -4,6 +4,7 @@ import { getSocket } from '../../lib/socket';
 import { useAuth } from '../../hooks/useAuth';
 import { extractErrorMessages } from '../../lib/errors';
 import { MapView, MapMarker } from '../../components/MapView';
+import { generateInvoicePdf } from '../../lib/invoice';
 
 interface TrackingItemMetadata {
   category?: string;
@@ -43,6 +44,7 @@ interface TrackingItemMetadata {
 
 const SHIPMENT_MODES = ['Route', 'Maritime', 'Aérien'];
 const PAYMENT_MODES = ['Virement bancaire', 'Paiement à la livraison', 'Carte bancaire', 'Espèces', 'Mobile money'];
+const STATUS_OPTIONS = ['RECEIVED', 'PREPARING', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'RETURNED'];
 
 interface TrackingItem {
   id: string;
@@ -441,6 +443,16 @@ export default function AdminDashboard() {
     }
   }
 
+  async function updateStatus(itemId: string, status: string) {
+    setPageError(null);
+    try {
+      await api.patch(`/tracking-items/${itemId}/status`, { status });
+      await loadItems();
+    } catch (err) {
+      setPageError(extractErrorMessages(err).join(' '));
+    }
+  }
+
   const markers: MapMarker[] = items
     .filter((i) => i.positions?.length)
     .map((i) => ({
@@ -568,7 +580,24 @@ export default function AdminDashboard() {
                 <div key={item.id} className="rounded border bg-white p-3 text-sm">
                   <div className="font-medium">{item.label ?? item.publicCode}</div>
                   <div className="text-gray-500">Code : {item.publicCode}</div>
-                  <div>Statut : {item.currentStatus}</div>
+
+                  <label className="mt-1 block text-xs text-gray-500">
+                    Statut
+                    <select
+                      value={item.currentStatus}
+                      onChange={(e) => updateStatus(item.id, e.target.value)}
+                      className="mt-1 w-full rounded border px-2 py-1"
+                    >
+                      {!STATUS_OPTIONS.includes(item.currentStatus) && (
+                        <option value={item.currentStatus}>{item.currentStatus}</option>
+                      )}
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
                   {item.type === 'PARCEL' ? (
                     <div className="mt-1 text-xs text-gray-600">
@@ -620,6 +649,13 @@ export default function AdminDashboard() {
                     className="mt-1 block text-xs text-blue-600 hover:underline"
                   >
                     {editingItemId === item.id ? 'Fermer' : 'Modifier les infos'}
+                  </button>
+
+                  <button
+                    onClick={() => generateInvoicePdf(item)}
+                    className="mt-1 block text-xs text-blue-600 hover:underline"
+                  >
+                    Générer la facture (PDF)
                   </button>
 
                   {editingItemId === item.id && (

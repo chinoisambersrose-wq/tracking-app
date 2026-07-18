@@ -1,6 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../lib/i18n';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import {
   TruckIcon,
   ShipIcon,
@@ -14,30 +16,6 @@ import {
   CheckCircleIcon,
 } from '../../components/icons';
 
-const SERVICES = [
-  {
-    icon: TruckIcon,
-    title: 'Transport routier',
-    text: "Livraison rapide et sécurisée de vos colis et véhicules partout sur le territoire.",
-  },
-  {
-    icon: ShipIcon,
-    title: 'Fret maritime',
-    text: 'Expéditions maritimes fiables pour vos envois volumineux, suivies de bout en bout.',
-  },
-  {
-    icon: PlaneIcon,
-    title: 'Fret aérien',
-    text: 'Solutions express par voie aérienne pour vos envois urgents et prioritaires.',
-  },
-];
-
-const FEATURES = [
-  { icon: MapPinIcon, title: 'Suivi GPS en temps réel', text: 'Localisez votre colis ou véhicule à tout instant sur la carte.' },
-  { icon: ClockIcon, title: 'Historique complet', text: "Chaque étape du transport est horodatée et consultable." },
-  { icon: ShieldIcon, title: 'Multi-organisations sécurisées', text: 'Chaque client dispose de son espace isolé et de ses agents dédiés.' },
-];
-
 function roleHome(role: string) {
   if (role === 'SUPER_ADMIN') return '/super-admin';
   if (role === 'ADMIN') return '/admin';
@@ -47,6 +25,7 @@ function roleHome(role: string) {
 export default function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [code, setCode] = useState('');
 
   function handleTrack(e: FormEvent) {
@@ -54,6 +33,18 @@ export default function HomePage() {
     const trimmed = code.trim();
     navigate(trimmed ? `/track?code=${encodeURIComponent(trimmed)}` : '/track');
   }
+
+  const SERVICES = [
+    { icon: TruckIcon, title: t('services.road.title'), text: t('services.road.text') },
+    { icon: ShipIcon, title: t('services.sea.title'), text: t('services.sea.text') },
+    { icon: PlaneIcon, title: t('services.air.title'), text: t('services.air.text') },
+  ];
+
+  const FEATURES = [
+    { icon: MapPinIcon, title: t('features.gps.title'), text: t('features.gps.text') },
+    { icon: ClockIcon, title: t('features.history.title'), text: t('features.history.text') },
+    { icon: ShieldIcon, title: t('features.org.title'), text: t('features.org.text') },
+  ];
 
   return (
     <div className="min-h-full bg-white text-ink-900">
@@ -67,25 +58,28 @@ export default function HomePage() {
             Tracking<span className="text-brand-600">App</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 sm:flex">
-            <a href="#services" className="hover:text-brand-600">Services</a>
-            <a href="#features" className="hover:text-brand-600">Fonctionnalités</a>
-            <Link to="/track" className="hover:text-brand-600">Suivre un envoi</Link>
+            <a href="#services" className="hover:text-brand-600">{t('nav.services')}</a>
+            <a href="#features" className="hover:text-brand-600">{t('nav.features')}</a>
+            <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
           </nav>
-          {user ? (
-            <Link
-              to={roleHome(user.role)}
-              className="rounded-md bg-ink-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-ink-700"
-            >
-              Mon espace
-            </Link>
-          ) : (
-            <Link
-              to="/login"
-              className="rounded-md bg-ink-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-ink-700"
-            >
-              Connexion
-            </Link>
-          )}
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            {user ? (
+              <Link
+                to={roleHome(user.role)}
+                className="rounded-md bg-ink-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-ink-700"
+              >
+                {t('nav.myspace')}
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="rounded-md bg-ink-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-ink-700"
+              >
+                {t('nav.login')}
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -98,15 +92,12 @@ export default function HomePage() {
         />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-brand-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-300">
-            Rapide &amp; fiable
+            {t('hero.badge')}
           </p>
           <h1 className="max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-            Suivez vos colis et véhicules <span className="text-brand-500">en temps réel</span>
+            {t('hero.title1')} <span className="text-brand-500">{t('hero.title2')}</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-ink-600 sm:text-ink-100/80">
-            Une plateforme unique pour gérer, expédier et suivre vos envois — du dépôt jusqu'à la livraison, avec
-            géolocalisation GPS et historique complet.
-          </p>
+          <p className="mt-5 max-w-xl text-lg text-ink-600 sm:text-ink-100/80">{t('hero.subtitle')}</p>
 
           <form
             onSubmit={handleTrack}
@@ -117,7 +108,7 @@ export default function HomePage() {
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="Entrez votre code de suivi (ex : TRK-AB12CD34)"
+                placeholder={t('hero.searchPlaceholder')}
                 className="w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-600/40 focus:outline-none"
               />
             </div>
@@ -125,16 +116,16 @@ export default function HomePage() {
               type="submit"
               className="flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
             >
-              Suivre mon envoi
+              {t('hero.searchButton')}
               <ArrowRightIcon className="h-4 w-4" />
             </button>
           </form>
 
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ink-100/70">
-            {['Suivi GPS en direct', 'Notifications automatiques', 'Multi-organisations'].map((t) => (
-              <span key={t} className="flex items-center gap-2">
+            {[t('hero.check1'), t('hero.check2'), t('hero.check3')].map((label) => (
+              <span key={label} className="flex items-center gap-2">
                 <CheckCircleIcon className="h-4 w-4 text-brand-500" />
-                {t}
+                {label}
               </span>
             ))}
           </div>
@@ -144,10 +135,8 @@ export default function HomePage() {
       {/* Services */}
       <section id="services" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mb-12 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Nos services</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            Une solution pour chaque type de transport
-          </h2>
+          <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">{t('services.kicker')}</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('services.title')}</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map(({ icon: Icon, title, text }) => (
@@ -169,8 +158,8 @@ export default function HomePage() {
       <section id="features" className="bg-ink-900 py-20 text-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-12 max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-500">Pourquoi nous choisir</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Conçu pour la transparence</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-500">{t('features.kicker')}</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('features.title')}</h2>
           </div>
           <div className="grid gap-8 sm:grid-cols-3">
             {FEATURES.map(({ icon: Icon, title, text }) => (
@@ -190,14 +179,14 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-brand-600 p-10 text-white sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-2xl font-bold sm:text-3xl">Prêt à suivre votre envoi ?</h2>
-            <p className="mt-2 text-brand-50/90">Entrez simplement votre code de suivi, aucune inscription requise.</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{t('cta.title')}</h2>
+            <p className="mt-2 text-brand-50/90">{t('cta.subtitle')}</p>
           </div>
           <Link
             to="/track"
             className="flex shrink-0 items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
           >
-            Suivre un colis
+            {t('cta.button')}
             <ArrowRightIcon className="h-4 w-4" />
           </Link>
         </div>
@@ -206,10 +195,10 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-ink-900/10 bg-white py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-ink-700/70 sm:flex-row sm:px-6">
-          <span>© {new Date().getFullYear()} TrackingApp — Tous droits réservés.</span>
+          <span>© {new Date().getFullYear()} TrackingApp — {t('footer.rights')}</span>
           <div className="flex gap-6">
-            <Link to="/track" className="hover:text-brand-600">Suivre un envoi</Link>
-            <Link to="/login" className="hover:text-brand-600">Espace professionnel</Link>
+            <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
+            <Link to="/login" className="hover:text-brand-600">{t('nav.pro')}</Link>
           </div>
         </div>
       </footer>

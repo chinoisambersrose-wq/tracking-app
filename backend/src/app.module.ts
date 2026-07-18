@@ -16,6 +16,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { PublicTrackingModule } from './public-tracking/public-tracking.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { TranslationModule } from './translation/translation.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RealtimeModule } from './realtime/realtime.module';
     AuditLogModule,
     PublicTrackingModule,
     RealtimeModule,
+    TranslationModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
