@@ -62,12 +62,13 @@ model Organization {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  passwordHash String
-  fullName     String
-  role         UserRole
-  status       UserStatus @default(ACTIVE)
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String
+  fullName      String
+  role          UserRole
+  status        UserStatus @default(ACTIVE)
+  whatsappPhone String? // numéro WhatsApp de contact (Admin), attribué par le Super Admin
 
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])

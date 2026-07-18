@@ -60,6 +60,7 @@ export class AuthService {
         role: user.role,
         status: user.status,
         organizationId: user.organizationId,
+        whatsappPhone: user.whatsappPhone,
       },
     };
   }

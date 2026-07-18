@@ -9,6 +9,7 @@ import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { createAdminSchema, CreateAdminDto } from './dto/create-admin.schema';
 import { createAgentSchema, CreateAgentDto } from './dto/create-agent.schema';
+import { updateWhatsappSchema, UpdateWhatsappDto } from './dto/update-whatsapp.schema';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
@@ -48,6 +49,16 @@ export class UsersController {
   @Roles(UserRole.SUPER_ADMIN)
   deleteAdmin(@Param('id') id: string, @CurrentUser() actor: AuthenticatedUser) {
     return this.usersService.deleteAdmin(id, actor.id);
+  }
+
+  @Patch('admins/:id/whatsapp')
+  @Roles(UserRole.SUPER_ADMIN)
+  updateAdminWhatsapp(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(updateWhatsappSchema)) dto: UpdateWhatsappDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.usersService.updateAdminWhatsapp(id, dto, actor.id);
   }
 
   // --- Admin : agents ---

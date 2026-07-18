@@ -110,6 +110,15 @@ export function ArrowRightIcon(props: IconProps) {
   );
 }
 
+export function WhatsAppIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 21l1.4-4.1A8 8 0 1 1 8 19.5L3 21z" />
+      <path d="M8.5 9.5c0 3 2.5 5.5 5.5 5.5.6 0 1.1-.5.9-1.1l-.4-1.1a.9.9 0 0 0-1-.6l-1 .2a4.4 4.4 0 0 1-2.4-2.4l.2-1a.9.9 0 0 0-.6-1L8.6 8a.9.9 0 0 0-1.1.9z" />
+    </svg>
+  );
+}
+
 export function CheckCircleIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

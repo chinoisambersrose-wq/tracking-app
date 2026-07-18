@@ -10,6 +10,7 @@ interface AdminRow {
   status: 'ACTIVE' | 'TRIAL' | 'EXPIRED' | 'SUSPENDED';
   daysRemaining: number | null;
   organization: { name: string; trackingMode: string };
+  whatsappPhone?: string | null;
 }
 
 const statusLabels: Record<AdminRow['status'], string> = {
@@ -52,6 +53,7 @@ export default function SuperAdminDashboard() {
         organizationName: form.get('organizationName'),
         trackingMode: form.get('trackingMode'),
         trialDurationDays: Number(form.get('trialDurationDays')),
+        whatsappPhone: form.get('whatsappPhone') || undefined,
       });
       setShowForm(false);
       formEl.reset();
@@ -89,6 +91,18 @@ export default function SuperAdminDashboard() {
     setPageError(null);
     try {
       await api.patch(`/admins/${id}/reactivate`);
+      await loadAdmins();
+    } catch (err) {
+      setPageError(extractErrorMessages(err).join(' '));
+    }
+  }
+
+  async function editWhatsapp(id: string, current?: string | null) {
+    const value = prompt('Numéro WhatsApp (avec indicatif, ex : +33612345678)', current ?? '');
+    if (value === null) return;
+    setPageError(null);
+    try {
+      await api.patch(`/admins/${id}/whatsapp`, { whatsappPhone: value.trim() || null });
       await loadAdmins();
     } catch (err) {
       setPageError(extractErrorMessages(err).join(' '));
@@ -174,6 +188,10 @@ export default function SuperAdminDashboard() {
             />
             <p className="mt-1 text-xs text-gray-500">Durée de l'essai en jours.</p>
           </div>
+          <div>
+            <input name="whatsappPhone" placeholder="Numéro WhatsApp (ex : +33612345678)" className="w-full rounded border px-3 py-2" />
+            <p className="mt-1 text-xs text-gray-500">Optionnel — utilisé dans les liens de suivi partagés par cet admin.</p>
+          </div>
           <button
             type="submit"
             disabled={submitting}
@@ -190,6 +208,7 @@ export default function SuperAdminDashboard() {
             <th className="p-3">Nom</th>
             <th className="p-3">Email</th>
             <th className="p-3">Organisation</th>
+            <th className="p-3">WhatsApp</th>
             <th className="p-3">Statut</th>
             <th className="p-3">Jours restants</th>
             <th className="p-3">Actions</th>
@@ -201,9 +220,15 @@ export default function SuperAdminDashboard() {
               <td className="p-3">{a.fullName}</td>
               <td className="p-3">{a.email}</td>
               <td className="p-3">{a.organization?.name}</td>
+              <td className="p-3">
+                {a.whatsappPhone ?? <span className="text-gray-400">—</span>}
+              </td>
               <td className="p-3">{statusLabels[a.status]}</td>
               <td className="p-3">{a.daysRemaining ?? '—'}</td>
               <td className="space-x-2 p-3">
+                <button onClick={() => editWhatsapp(a.id, a.whatsappPhone)} className="text-blue-600 hover:underline">
+                  WhatsApp
+                </button>
                 <button onClick={() => extendTrial(a.id)} className="text-blue-600 hover:underline">
                   Prolonger
                 </button>

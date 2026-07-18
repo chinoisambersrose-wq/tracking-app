@@ -111,6 +111,8 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'track.remark': 'Remarque',
 
     'track.currentPosition': 'Position actuelle',
+    'track.whatsappContact': 'Une question sur cet envoi ?',
+    'track.whatsappButton': 'Contacter sur WhatsApp',
   },
   en: {
     'nav.services': 'Services',
@@ -209,6 +211,8 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'track.remark': 'Remark',
 
     'track.currentPosition': 'Current position',
+    'track.whatsappContact': 'A question about this shipment?',
+    'track.whatsappButton': 'Contact on WhatsApp',
   },
   de: {
     'nav.services': 'Leistungen',
@@ -307,5 +311,7 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'track.remark': 'Bemerkung',
 
     'track.currentPosition': 'Aktuelle Position',
+    'track.whatsappContact': 'Eine Frage zu dieser Sendung?',
+    'track.whatsappButton': 'Über WhatsApp kontaktieren',
   },
 };

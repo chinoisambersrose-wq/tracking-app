@@ -12,6 +12,7 @@ import {
   MapPinIcon,
   ClockIcon,
   CheckCircleIcon,
+  WhatsAppIcon,
 } from '../../components/icons';
 
 interface TrackingDetails {
@@ -155,6 +156,13 @@ export default function PublicTrackingPage() {
 
   const tone = result ? statusTone(result.currentStatus) : null;
   const locale = DATE_LOCALES[lang] ?? 'fr-FR';
+  const waNumber = searchParams.get('wa');
+  const waDigits = waNumber ? waNumber.replace(/[^\d]/g, '') : null;
+  const waLink = waDigits
+    ? `https://wa.me/${waDigits}?text=${encodeURIComponent(
+        `Bonjour, j'ai une question concernant mon envoi ${result?.publicCode ?? code}.`,
+      )}`
+    : null;
 
   return (
     <div className="min-h-full bg-gray-50 text-ink-900">
@@ -419,6 +427,25 @@ export default function PublicTrackingPage() {
                   />
                 </div>
               </div>
+            )}
+
+            {/* Contact WhatsApp */}
+            {waLink && (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-4 rounded-2xl bg-emerald-600 p-5 text-white shadow-card transition hover:bg-emerald-700"
+              >
+                <div>
+                  <div className="text-sm font-semibold">{t('track.whatsappContact')}</div>
+                  <div className="text-xs text-emerald-50/90">{waNumber}</div>
+                </div>
+                <span className="flex shrink-0 items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold">
+                  <WhatsAppIcon className="h-4 w-4" />
+                  {t('track.whatsappButton')}
+                </span>
+              </a>
             )}
           </div>
         )}

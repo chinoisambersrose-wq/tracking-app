@@ -11,6 +11,7 @@ export interface AuthUser {
   role: Role;
   status: string;
   organizationId: string | null;
+  whatsappPhone?: string | null;
 }
 
 interface AuthContextValue {

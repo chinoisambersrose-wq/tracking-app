@@ -297,6 +297,7 @@ export default function AdminDashboard() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editFormErrors, setEditFormErrors] = useState<string[]>([]);
   const [submittingEdit, setSubmittingEdit] = useState(false);
+  const [copiedItemId, setCopiedItemId] = useState<string | null>(null);
 
   async function loadItems() {
     const { data } = await api.get<TrackingItem[]>('/tracking-items');
@@ -440,6 +441,23 @@ export default function AdminDashboard() {
       await loadItems();
     } catch (err) {
       setPageError(extractErrorMessages(err).join(' '));
+    }
+  }
+
+  function buildShareLink(item: TrackingItem): string {
+    const base = `${window.location.origin}/track?code=${encodeURIComponent(item.publicCode)}`;
+    return user?.whatsappPhone ? `${base}&wa=${encodeURIComponent(user.whatsappPhone)}` : base;
+  }
+
+  async function shareTrackingLink(item: TrackingItem) {
+    const link = buildShareLink(item);
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedItemId(item.id);
+      setTimeout(() => setCopiedItemId((cur) => (cur === item.id ? null : cur)), 2000);
+    } catch {
+      // Presse-papiers indisponible (permissions navigateur) : on affiche le lien pour copie manuelle.
+      prompt('Copiez ce lien :', link);
     }
   }
 
@@ -657,6 +675,18 @@ export default function AdminDashboard() {
                   >
                     Générer la facture (PDF)
                   </button>
+
+                  <button
+                    onClick={() => shareTrackingLink(item)}
+                    className="mt-1 block text-xs text-blue-600 hover:underline"
+                  >
+                    {copiedItemId === item.id ? 'Lien copié ✓' : 'Copier le lien de suivi'}
+                  </button>
+                  {!user?.whatsappPhone && (
+                    <p className="mt-0.5 text-[11px] text-gray-400">
+                      Aucun numéro WhatsApp associé à votre compte — demandez au Super Admin d'en ajouter un pour l'inclure dans le lien.
+                    </p>
+                  )}
 
                   {editingItemId === item.id && (
                     <form

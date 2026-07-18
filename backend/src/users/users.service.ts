@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CreateAdminDto } from './dto/create-admin.schema';
 import { CreateAgentDto } from './dto/create-agent.schema';
+import { UpdateWhatsappDto } from './dto/update-whatsapp.schema';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,7 @@ export class UsersService {
           status: UserStatus.TRIAL,
           organizationId: organization.id,
           createdById: actorId,
+          whatsappPhone: dto.whatsappPhone,
         },
       });
 
@@ -99,6 +101,13 @@ export class UsersService {
       : UserStatus.ACTIVE;
     await this.prisma.user.update({ where: { id: admin.id }, data: { status: newStatus } });
     await this.auditLog.log(actorId, 'ADMIN_REACTIVATED', 'User', id);
+    return this.getAdminWithTrial(id);
+  }
+
+  async updateAdminWhatsapp(id: string, dto: UpdateWhatsappDto, actorId: string) {
+    await this.requireAdmin(id);
+    await this.prisma.user.update({ where: { id }, data: { whatsappPhone: dto.whatsappPhone } });
+    await this.auditLog.log(actorId, 'ADMIN_WHATSAPP_UPDATED', 'User', id);
     return this.getAdminWithTrial(id);
   }
 
