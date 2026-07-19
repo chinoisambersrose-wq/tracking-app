@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../lib/i18n';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { TruckHeroIllustration, ShipHeroIllustration } from '../../components/illustrations';
 import {
   TruckIcon,
   ShipIcon,
@@ -46,6 +47,18 @@ export default function HomePage() {
     { icon: ShieldIcon, title: t('features.org.title'), text: t('features.org.text') },
   ];
 
+  const STATS = [
+    { num: t('hero.stat1Num'), label: t('hero.stat1Label') },
+    { num: t('hero.stat2Num'), label: t('hero.stat2Label') },
+    { num: t('hero.stat3Num'), label: t('hero.stat3Label') },
+  ];
+
+  const NETWORK_POINTS = [
+    { icon: TruckIcon, text: t('network.pointRoad') },
+    { icon: ShipIcon, text: t('network.pointSea') },
+    { icon: PlaneIcon, text: t('network.pointAir') },
+  ];
+
   return (
     <div className="min-h-full bg-white text-ink-900">
       {/* Header */}
@@ -59,6 +72,7 @@ export default function HomePage() {
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 sm:flex">
             <a href="#services" className="hover:text-brand-600">{t('nav.services')}</a>
+            <a href="#network" className="hover:text-brand-600">{t('network.kicker')}</a>
             <a href="#features" className="hover:text-brand-600">{t('nav.features')}</a>
             <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
           </nav>
@@ -90,44 +104,96 @@ export default function HomePage() {
           className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-600/30 blur-3xl"
           aria-hidden
         />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-brand-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-300">
-            {t('hero.badge')}
-          </p>
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-            {t('hero.title1')} <span className="text-brand-500">{t('hero.title2')}</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-lg text-ink-600 sm:text-ink-100/80">{t('hero.subtitle')}</p>
+        <div
+          className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-brand-500/10 blur-3xl"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          {/* Colonne texte */}
+          <div>
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-brand-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-300">
+              {t('hero.badge')}
+            </p>
+            <h1 className="max-w-xl text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
+              {t('hero.title1')} <span className="text-brand-500">{t('hero.title2')}</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-ink-100/80">{t('hero.subtitle')}</p>
 
-          <form
-            onSubmit={handleTrack}
-            className="mt-10 flex max-w-xl flex-col gap-3 rounded-xl bg-white p-2 shadow-glow sm:flex-row"
-          >
-            <div className="flex flex-1 items-center gap-2 px-3 py-2">
-              <SearchIcon className="h-5 w-5 shrink-0 text-ink-600/50" />
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder={t('hero.searchPlaceholder')}
-                className="w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-600/40 focus:outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
+            <form
+              onSubmit={handleTrack}
+              className="mt-10 flex max-w-xl flex-col gap-3 rounded-xl bg-white p-2 shadow-glow sm:flex-row"
             >
-              {t('hero.searchButton')}
-              <ArrowRightIcon className="h-4 w-4" />
-            </button>
-          </form>
+              <div className="flex flex-1 items-center gap-2 px-3 py-2">
+                <SearchIcon className="h-5 w-5 shrink-0 text-ink-600/50" />
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder={t('hero.searchPlaceholder')}
+                  className="w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-600/40 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
+              >
+                {t('hero.searchButton')}
+                <ArrowRightIcon className="h-4 w-4" />
+              </button>
+            </form>
 
-          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ink-100/70">
-            {[t('hero.check1'), t('hero.check2'), t('hero.check3')].map((label) => (
-              <span key={label} className="flex items-center gap-2">
-                <CheckCircleIcon className="h-4 w-4 text-brand-500" />
-                {label}
+            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ink-100/70">
+              {[t('hero.check1'), t('hero.check2'), t('hero.check3')].map((label) => (
+                <span key={label} className="flex items-center gap-2">
+                  <CheckCircleIcon className="h-4 w-4 text-brand-500" />
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            {/* Bandeau statistiques */}
+            <div className="mt-12 grid max-w-xl grid-cols-3 gap-6 border-t border-white/10 pt-8">
+              {STATS.map((s) => (
+                <div key={s.label}>
+                  <div className="text-2xl font-extrabold text-white sm:text-3xl">{s.num}</div>
+                  <div className="mt-1 text-xs text-ink-100/60">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Colonne illustration */}
+          <div className="relative hidden lg:block">
+            <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+              <TruckHeroIllustration className="h-auto w-full" />
+            </div>
+
+            {/* Badge flottant : en transit */}
+            <div className="absolute -left-8 top-8 flex items-center gap-3 rounded-xl bg-white/95 px-4 py-3 text-ink-900 shadow-glow backdrop-blur">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
               </span>
-            ))}
+              <div>
+                <p className="text-xs font-semibold">{t('hero.liveBadge')}</p>
+                <p className="text-[11px] text-ink-700/70">{t('hero.liveBadgeSub')}</p>
+              </div>
+            </div>
+
+            {/* Badge flottant : ETA */}
+            <div className="absolute -right-6 bottom-10 flex items-center gap-3 rounded-xl bg-white/95 px-4 py-3 text-ink-900 shadow-glow backdrop-blur">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                <ClockIcon className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold">{t('hero.etaBadge')}</p>
+                <p className="text-[11px] text-ink-700/70">{t('hero.etaBadgeSub')}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Illustration mobile (pleine largeur, en dessous du texte) */}
+          <div className="-mx-4 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 lg:hidden">
+            <TruckHeroIllustration className="h-auto w-full" />
           </div>
         </div>
       </section>
@@ -154,21 +220,54 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Réseau mondial (bande navire) */}
+      <section id="network" className="relative overflow-hidden bg-ink-900 text-white">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-400">{t('network.kicker')}</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('network.title')}</h2>
+            <p className="mt-4 max-w-md text-ink-100/70">{t('network.text')}</p>
+            <ul className="mt-8 space-y-4">
+              {NETWORK_POINTS.map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-400">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="text-sm text-ink-100/80">{text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="relative">
+            <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+              <ShipHeroIllustration className="h-auto w-full" />
+            </div>
+            <div className="absolute -bottom-6 left-6 flex items-center gap-3 rounded-xl bg-white/95 px-4 py-3 text-ink-900 shadow-glow backdrop-blur sm:left-10">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              <p className="text-xs font-semibold">{t('network.badge')}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="bg-ink-900 py-20 text-white">
+      <section id="features" className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-12 max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-500">{t('features.kicker')}</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">{t('features.kicker')}</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('features.title')}</h2>
           </div>
           <div className="grid gap-8 sm:grid-cols-3">
             {FEATURES.map(({ icon: Icon, title, text }) => (
-              <div key={title}>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-brand-500">
+              <div key={title} className="rounded-2xl border border-ink-900/5 bg-white p-6 shadow-card">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-100/70">{text}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-700/80">{text}</p>
               </div>
             ))}
           </div>
