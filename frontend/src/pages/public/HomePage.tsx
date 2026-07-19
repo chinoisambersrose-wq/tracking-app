@@ -198,7 +198,6 @@ export default function HomePage() {
           <span>© {new Date().getFullYear()} TrackingApp — {t('footer.rights')}</span>
           <div className="flex gap-6">
             <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
-            <Link to="/login" className="hover:text-brand-600">{t('nav.pro')}</Link>
           </div>
         </div>
       </footer>

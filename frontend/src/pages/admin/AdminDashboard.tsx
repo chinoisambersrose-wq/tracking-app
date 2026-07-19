@@ -5,6 +5,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { extractErrorMessages } from '../../lib/errors';
 import { MapView, MapMarker } from '../../components/MapView';
 import { generateInvoicePdf } from '../../lib/invoice';
+import { useI18n } from '../../lib/i18n';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 
 interface TrackingItemMetadata {
   category?: string;
@@ -43,8 +45,11 @@ interface TrackingItemMetadata {
 }
 
 const SHIPMENT_MODES = ['Route', 'Maritime', 'Aérien'];
-const PAYMENT_MODES = ['Virement bancaire', 'Paiement à la livraison', 'Carte bancaire', 'Espèces', 'Mobile money'];
+// À la demande du client, seul le virement bancaire reste proposé.
+const PAYMENT_MODES = ['Virement bancaire'];
 const STATUS_OPTIONS = ['RECEIVED', 'PREPARING', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'RETURNED'];
+// Référence transporteur : 14 chiffres minimum, uniquement des chiffres.
+const CARRIER_REF_PATTERN = '\\d{14,}';
 
 interface TrackingItem {
   id: string;
@@ -55,12 +60,6 @@ interface TrackingItem {
   assignedAgent: { id: string; fullName: string } | null;
   positions?: { latitude: number; longitude: number }[];
   metadata?: TrackingItemMetadata | null;
-}
-
-interface Agent {
-  id: string;
-  fullName: string;
-  email: string;
 }
 
 const PARCEL_CATEGORIES = [
@@ -75,32 +74,35 @@ const PARCEL_CATEGORIES = [
   'Autre',
 ];
 
-/**
- * Champs de métadonnées communs au formulaire de création et au formulaire
- * d'édition, pré-remplis via `defaults` si fournis. Les noms des champs
- * (`name=`) correspondent aux clés attendues par le backend (voir
- * backend/src/tracking-items/dto/tracking-item-metadata.schema.ts).
- */
 /** Champs d'expédition communs (transporteur, mode, référence, dates...), affichés pour PARCEL et VEHICLE. */
 function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-2 border-t border-dashed pt-2">
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Informations d'expédition</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">{t('admin.md.shipmentTitle')}</p>
       <div className="grid grid-cols-3 gap-2">
-        <input name="carrier" defaultValue={defaults?.carrier} placeholder="Transporteur" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="carrier" defaultValue={defaults?.carrier} placeholder={t('admin.md.carrier')} className="rounded border px-2 py-1.5 text-sm" />
         <select name="shipmentMode" defaultValue={defaults?.shipmentMode ?? ''} className="rounded border px-2 py-1.5 text-sm">
-          <option value="">Mode d'expédition…</option>
+          <option value="">{t('admin.md.shipmentMode')}</option>
           {SHIPMENT_MODES.map((m) => (
             <option key={m} value={m}>
               {m}
             </option>
           ))}
         </select>
-        <input name="carrierReferenceNo" defaultValue={defaults?.carrierReferenceNo} placeholder="Référence transporteur" className="rounded border px-2 py-1.5 text-sm" />
+        <input
+          name="carrierReferenceNo"
+          defaultValue={defaults?.carrierReferenceNo}
+          placeholder={t('admin.md.carrierRef')}
+          pattern={CARRIER_REF_PATTERN}
+          minLength={14}
+          inputMode="numeric"
+          title={t('admin.md.carrierRef')}
+          className="rounded border px-2 py-1.5 text-sm"
+        />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <select name="paymentMode" defaultValue={defaults?.paymentMode ?? ''} className="rounded border px-2 py-1.5 text-sm">
-          <option value="">Mode de paiement…</option>
+        <select name="paymentMode" defaultValue={defaults?.paymentMode ?? PAYMENT_MODES[0]} className="rounded border px-2 py-1.5 text-sm">
           {PAYMENT_MODES.map((m) => (
             <option key={m} value={m}>
               {m}
@@ -113,14 +115,14 @@ function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
           step="0.01"
           min={0}
           defaultValue={defaults?.totalFreight}
-          placeholder="Frais totaux"
+          placeholder={t('admin.md.totalFreight')}
           className="rounded border px-2 py-1.5 text-sm"
         />
         <input name="expectedDeliveryDate" type="date" defaultValue={defaults?.expectedDeliveryDate} className="rounded border px-2 py-1.5 text-sm" />
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <input name="originCity" defaultValue={defaults?.originCity} placeholder="Ville d'origine" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="destinationCity" defaultValue={defaults?.destinationCity} placeholder="Ville de destination" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="originCity" defaultValue={defaults?.originCity} placeholder={t('admin.md.originCity')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="destinationCity" defaultValue={defaults?.destinationCity} placeholder={t('admin.md.destinationCity')} className="rounded border px-2 py-1.5 text-sm" />
       </div>
       <div className="grid grid-cols-3 gap-2">
         <input name="pickupDate" type="date" defaultValue={defaults?.pickupDate} className="rounded border px-2 py-1.5 text-sm" title="Date de ramassage" />
@@ -130,7 +132,7 @@ function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
       <textarea
         name="comments"
         defaultValue={defaults?.comments}
-        placeholder="Commentaires / consignes de livraison (visible publiquement)"
+        placeholder={t('admin.md.comments')}
         rows={2}
         className="w-full rounded border px-2 py-1.5 text-sm"
       />
@@ -139,15 +141,17 @@ function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
 }
 
 function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaults?: TrackingItemMetadata }) {
+  const { t } = useI18n();
+
   if (type === 'VEHICLE') {
     return (
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
-          <input name="plateNumber" defaultValue={defaults?.plateNumber} placeholder="Plaque d'immatriculation" className="rounded border px-2 py-1.5 text-sm" />
-          <input name="vehicleModel" defaultValue={defaults?.vehicleModel} placeholder="Modèle" className="rounded border px-2 py-1.5 text-sm" />
-          <input name="vehicleColor" defaultValue={defaults?.vehicleColor} placeholder="Couleur" className="rounded border px-2 py-1.5 text-sm" />
-          <input name="driverName" defaultValue={defaults?.driverName} placeholder="Nom du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
-          <input name="driverPhone" defaultValue={defaults?.driverPhone} placeholder="Téléphone du chauffeur" className="rounded border px-2 py-1.5 text-sm" />
+          <input name="plateNumber" defaultValue={defaults?.plateNumber} placeholder={t('admin.md.plateNumber')} className="rounded border px-2 py-1.5 text-sm" />
+          <input name="vehicleModel" defaultValue={defaults?.vehicleModel} placeholder={t('admin.md.vehicleModel')} className="rounded border px-2 py-1.5 text-sm" />
+          <input name="vehicleColor" defaultValue={defaults?.vehicleColor} placeholder={t('admin.md.vehicleColor')} className="rounded border px-2 py-1.5 text-sm" />
+          <input name="driverName" defaultValue={defaults?.driverName} placeholder={t('admin.md.driverName')} className="rounded border px-2 py-1.5 text-sm" />
+          <input name="driverPhone" defaultValue={defaults?.driverPhone} placeholder={t('admin.md.driverPhone')} className="rounded border px-2 py-1.5 text-sm" />
         </div>
         <ShipmentFields defaults={defaults} />
       </div>
@@ -158,7 +162,7 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-2">
         <select name="category" defaultValue={defaults?.category ?? ''} className="rounded border px-2 py-1.5 text-sm">
-          <option value="">Catégorie du colis…</option>
+          <option value="">{t('admin.md.category')}</option>
           {PARCEL_CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -171,7 +175,7 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
           step="0.01"
           min={0}
           defaultValue={defaults?.weightKg}
-          placeholder="Poids (kg)"
+          placeholder={t('admin.md.weight')}
           className="rounded border px-2 py-1.5 text-sm"
         />
         <input
@@ -180,46 +184,44 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
           step="0.01"
           min={0}
           defaultValue={defaults?.declaredValue}
-          placeholder="Valeur déclarée"
+          placeholder={t('admin.md.declaredValue')}
           className="rounded border px-2 py-1.5 text-sm"
         />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <input name="lengthCm" type="number" step="0.1" min={0} defaultValue={defaults?.lengthCm} placeholder="Longueur (cm)" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="widthCm" type="number" step="0.1" min={0} defaultValue={defaults?.widthCm} placeholder="Largeur (cm)" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="heightCm" type="number" step="0.1" min={0} defaultValue={defaults?.heightCm} placeholder="Hauteur (cm)" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="lengthCm" type="number" step="0.1" min={0} defaultValue={defaults?.lengthCm} placeholder={t('admin.md.length')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="widthCm" type="number" step="0.1" min={0} defaultValue={defaults?.widthCm} placeholder={t('admin.md.width')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="heightCm" type="number" step="0.1" min={0} defaultValue={defaults?.heightCm} placeholder={t('admin.md.height')} className="rounded border px-2 py-1.5 text-sm" />
       </div>
       <label className="flex items-center gap-2 text-sm text-gray-600">
         <input type="checkbox" name="fragile" defaultChecked={defaults?.fragile} />
-        Colis fragile
+        {t('admin.md.fragileLabel')}
       </label>
       <textarea
         name="description"
         defaultValue={defaults?.description}
-        placeholder="Description du contenu"
+        placeholder={t('admin.md.description')}
         rows={2}
         className="w-full rounded border px-2 py-1.5 text-sm"
       />
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-        Expéditeur &amp; destinataire (affichés publiquement sur la page de suivi)
-      </p>
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">{t('admin.md.contactsTitle')}</p>
       <div className="grid grid-cols-2 gap-2">
-        <input name="senderName" defaultValue={defaults?.senderName} placeholder="Nom de l'expéditeur" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="senderPhone" defaultValue={defaults?.senderPhone} placeholder="Téléphone expéditeur" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="senderEmail" type="email" defaultValue={defaults?.senderEmail} placeholder="Email expéditeur" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="senderName" defaultValue={defaults?.senderName} placeholder={t('admin.md.senderName')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="senderPhone" defaultValue={defaults?.senderPhone} placeholder={t('admin.md.senderPhone')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="senderEmail" type="email" defaultValue={defaults?.senderEmail} placeholder={t('admin.md.senderEmail')} className="rounded border px-2 py-1.5 text-sm" />
         <input
           name="senderAddress"
           defaultValue={defaults?.senderAddress}
-          placeholder="Adresse de l'expéditeur"
+          placeholder={t('admin.md.senderAddress')}
           className="rounded border px-2 py-1.5 text-sm"
         />
-        <input name="recipientName" defaultValue={defaults?.recipientName} placeholder="Nom du destinataire" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="recipientPhone" defaultValue={defaults?.recipientPhone} placeholder="Téléphone destinataire" className="rounded border px-2 py-1.5 text-sm" />
-        <input name="recipientEmail" type="email" defaultValue={defaults?.recipientEmail} placeholder="Email destinataire" className="rounded border px-2 py-1.5 text-sm" />
+        <input name="recipientName" defaultValue={defaults?.recipientName} placeholder={t('admin.md.recipientName')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="recipientPhone" defaultValue={defaults?.recipientPhone} placeholder={t('admin.md.recipientPhone')} className="rounded border px-2 py-1.5 text-sm" />
+        <input name="recipientEmail" type="email" defaultValue={defaults?.recipientEmail} placeholder={t('admin.md.recipientEmail')} className="rounded border px-2 py-1.5 text-sm" />
         <input
           name="recipientAddress"
           defaultValue={defaults?.recipientAddress}
-          placeholder="Adresse de livraison"
+          placeholder={t('admin.md.recipientAddress')}
           className="rounded border px-2 py-1.5 text-sm"
         />
       </div>
@@ -279,16 +281,12 @@ function readMetadataFromForm(form: FormData): TrackingItemMetadata {
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const [items, setItems] = useState<TrackingItem[]>([]);
-  const [agents, setAgents] = useState<Agent[]>([]);
   const [showItemForm, setShowItemForm] = useState(false);
-  const [showAgentForm, setShowAgentForm] = useState(false);
   const [newItemType, setNewItemType] = useState<'PARCEL' | 'VEHICLE'>('PARCEL');
   const [itemFormErrors, setItemFormErrors] = useState<string[]>([]);
-  const [agentFormErrors, setAgentFormErrors] = useState<string[]>([]);
   const [pageError, setPageError] = useState<string | null>(null);
-  const [showAgentPassword, setShowAgentPassword] = useState(false);
-  const [submittingAgent, setSubmittingAgent] = useState(false);
   const [submittingItem, setSubmittingItem] = useState(false);
   const [pickingItemId, setPickingItemId] = useState<string | null>(null);
   const [pendingPosition, setPendingPosition] = useState<{ lat: number; lng: number } | null>(null);
@@ -304,14 +302,8 @@ export default function AdminDashboard() {
     setItems(data);
   }
 
-  async function loadAgents() {
-    const { data } = await api.get<Agent[]>('/agents');
-    setAgents(data);
-  }
-
   useEffect(() => {
     loadItems();
-    loadAgents();
     const socket = getSocket();
     socket?.on('status:update', loadItems);
     socket?.on('position:update', loadItems);
@@ -342,40 +334,6 @@ export default function AdminDashboard() {
       setItemFormErrors(extractErrorMessages(err));
     } finally {
       setSubmittingItem(false);
-    }
-  }
-
-  async function handleCreateAgent(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setAgentFormErrors([]);
-    setSubmittingAgent(true);
-    const formEl = e.currentTarget;
-    const form = new FormData(formEl);
-
-    try {
-      await api.post('/agents', {
-        email: form.get('email'),
-        password: form.get('password'),
-        fullName: form.get('fullName'),
-      });
-      setShowAgentForm(false);
-      formEl.reset();
-      await loadAgents();
-    } catch (err) {
-      setAgentFormErrors(extractErrorMessages(err));
-    } finally {
-      setSubmittingAgent(false);
-    }
-  }
-
-  async function removeAgent(id: string) {
-    if (!confirm('Retirer cet agent ?')) return;
-    setPageError(null);
-    try {
-      await api.delete(`/agents/${id}`);
-      await loadAgents();
-    } catch (err) {
-      setPageError(extractErrorMessages(err).join(' '));
     }
   }
 
@@ -433,17 +391,6 @@ export default function AdminDashboard() {
     }
   }
 
-  async function assignAgent(itemId: string, agentId: string) {
-    if (!agentId) return;
-    setPageError(null);
-    try {
-      await api.patch(`/tracking-items/${itemId}/assign/${agentId}`);
-      await loadItems();
-    } catch (err) {
-      setPageError(extractErrorMessages(err).join(' '));
-    }
-  }
-
   function buildShareLink(item: TrackingItem): string {
     const base = `${window.location.origin}/track?code=${encodeURIComponent(item.publicCode)}`;
     return user?.whatsappPhone ? `${base}&wa=${encodeURIComponent(user.whatsappPhone)}` : base;
@@ -484,17 +431,9 @@ export default function AdminDashboard() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b bg-white p-4">
-        <h1 className="text-xl font-semibold">Admin — {user?.fullName}</h1>
-        <div className="space-x-4">
-          <button
-            onClick={() => {
-              setShowAgentForm((v) => !v);
-              setAgentFormErrors([]);
-            }}
-            className="rounded bg-purple-600 px-3 py-1.5 text-white"
-          >
-            + Agent
-          </button>
+        <h1 className="text-xl font-semibold">{t('admin.title')} — {user?.fullName}</h1>
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher langs={['fr', 'en']} />
           <button
             onClick={() => {
               setShowItemForm((v) => !v);
@@ -502,56 +441,16 @@ export default function AdminDashboard() {
             }}
             className="rounded bg-blue-600 px-3 py-1.5 text-white"
           >
-            + Élément de tracking
+            {t('admin.newItem')}
           </button>
           <button onClick={logout} className="text-sm text-gray-500 hover:underline">
-            Déconnexion
+            {t('admin.logout')}
           </button>
         </div>
       </div>
 
       {pageError && (
         <div className="mx-4 mt-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">{pageError}</div>
-      )}
-
-      {showAgentForm && (
-        <form onSubmit={handleCreateAgent} className="space-y-3 border-b bg-gray-50 p-4">
-          {agentFormErrors.length > 0 && (
-            <ul className="list-inside list-disc rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-              {agentFormErrors.map((msg, i) => (
-                <li key={i}>{msg}</li>
-              ))}
-            </ul>
-          )}
-          <div className="flex gap-3">
-            <input name="fullName" placeholder="Nom complet" required minLength={2} className="flex-1 rounded border px-3 py-2" />
-            <input name="email" type="email" placeholder="Email" required className="flex-1 rounded border px-3 py-2" />
-            <div className="relative flex-1">
-              <input
-                name="password"
-                type={showAgentPassword ? 'text' : 'password'}
-                placeholder="Mot de passe (8 car. min.)"
-                required
-                minLength={8}
-                className="w-full rounded border px-3 py-2 pr-16"
-              />
-              <button
-                type="button"
-                onClick={() => setShowAgentPassword((v) => !v)}
-                className="absolute inset-y-0 right-2 text-xs text-gray-500 hover:text-gray-700"
-              >
-                {showAgentPassword ? 'Masquer' : 'Afficher'}
-              </button>
-            </div>
-            <button
-              type="submit"
-              disabled={submittingAgent}
-              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {submittingAgent ? 'Création…' : 'Créer'}
-            </button>
-          </div>
-        </form>
       )}
 
       {showItemForm && (
@@ -570,11 +469,11 @@ export default function AdminDashboard() {
               onChange={(e) => setNewItemType(e.target.value as 'PARCEL' | 'VEHICLE')}
               className="rounded border px-3 py-2"
             >
-              <option value="PARCEL">Colis</option>
-              <option value="VEHICLE">Véhicule</option>
+              <option value="PARCEL">{t('admin.parcel')}</option>
+              <option value="VEHICLE">{t('admin.vehicle')}</option>
             </select>
-            <input name="label" placeholder="Libellé" className="flex-1 rounded border px-3 py-2" />
-            <input name="initialStatus" placeholder="Statut initial (ex: RECEIVED)" className="rounded border px-3 py-2" />
+            <input name="label" placeholder={t('admin.label')} className="flex-1 rounded border px-3 py-2" />
+            <input name="initialStatus" placeholder={t('admin.initialStatus')} className="rounded border px-3 py-2" />
           </div>
 
           <MetadataFields type={newItemType} />
@@ -584,7 +483,7 @@ export default function AdminDashboard() {
             disabled={submittingItem}
             className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submittingItem ? 'Création…' : 'Créer'}
+            {submittingItem ? t('admin.creating') : t('admin.create')}
           </button>
         </form>
       )}
@@ -592,15 +491,15 @@ export default function AdminDashboard() {
       <div className="grid flex-1 grid-cols-3 gap-4 overflow-auto p-4">
         <div className="col-span-1 space-y-4 overflow-auto">
           <div>
-            <h2 className="mb-2 text-sm font-semibold text-gray-500">Éléments de tracking</h2>
+            <h2 className="mb-2 text-sm font-semibold text-gray-500">{t('admin.trackingItems')}</h2>
             <div className="space-y-2">
               {items.map((item) => (
                 <div key={item.id} className="rounded border bg-white p-3 text-sm">
                   <div className="font-medium">{item.label ?? item.publicCode}</div>
-                  <div className="text-gray-500">Code : {item.publicCode}</div>
+                  <div className="text-gray-500">{t('admin.code')} {item.publicCode}</div>
 
                   <label className="mt-1 block text-xs text-gray-500">
-                    Statut
+                    {t('admin.status')}
                     <select
                       value={item.currentStatus}
                       onChange={(e) => updateStatus(item.id, e.target.value)}
@@ -621,7 +520,7 @@ export default function AdminDashboard() {
                     <div className="mt-1 text-xs text-gray-600">
                       {item.metadata?.category && <span>{item.metadata.category}</span>}
                       {item.metadata?.weightKg && <span> · {item.metadata.weightKg} kg</span>}
-                      {item.metadata?.fragile && <span className="ml-1 text-orange-600">Fragile</span>}
+                      {item.metadata?.fragile && <span className="ml-1 text-orange-600">{t('admin.fragileBadge')}</span>}
                     </div>
                   ) : (
                     <div className="mt-1 text-xs text-gray-600">
@@ -630,32 +529,14 @@ export default function AdminDashboard() {
                     </div>
                   )}
 
-                  <label className="mt-2 block text-xs text-gray-500">
-                    Agent assigné
-                    <select
-                      value={item.assignedAgent?.id ?? ''}
-                      onChange={(e) => assignAgent(item.id, e.target.value)}
-                      className="mt-1 w-full rounded border px-2 py-1"
-                    >
-                      <option value="">Non assigné</option>
-                      {agents.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.fullName}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
                   {pickingItemId === item.id ? (
-                    <p className="mt-2 text-xs font-medium text-orange-600">
-                      Cliquez sur la carte pour choisir la position →
-                    </p>
+                    <p className="mt-2 text-xs font-medium text-orange-600">{t('admin.clickMap')}</p>
                   ) : (
                     <button
                       onClick={() => startPickingPosition(item.id)}
                       className="mt-2 block text-xs text-blue-600 hover:underline"
                     >
-                      {item.positions?.length ? 'Actualiser la position sur la carte' : 'Définir la position sur la carte'}
+                      {item.positions?.length ? t('admin.updatePosition') : t('admin.setPosition')}
                     </button>
                   )}
 
@@ -666,26 +547,24 @@ export default function AdminDashboard() {
                     }}
                     className="mt-1 block text-xs text-blue-600 hover:underline"
                   >
-                    {editingItemId === item.id ? 'Fermer' : 'Modifier les infos'}
+                    {editingItemId === item.id ? t('admin.close') : t('admin.editInfo')}
                   </button>
 
                   <button
                     onClick={() => generateInvoicePdf(item)}
                     className="mt-1 block text-xs text-blue-600 hover:underline"
                   >
-                    Générer la facture (PDF)
+                    {t('admin.generateInvoice')}
                   </button>
 
                   <button
                     onClick={() => shareTrackingLink(item)}
                     className="mt-1 block text-xs text-blue-600 hover:underline"
                   >
-                    {copiedItemId === item.id ? 'Lien copié ✓' : 'Copier le lien de suivi'}
+                    {copiedItemId === item.id ? t('admin.linkCopied') : t('admin.copyLink')}
                   </button>
                   {!user?.whatsappPhone && (
-                    <p className="mt-0.5 text-[11px] text-gray-400">
-                      Aucun numéro WhatsApp associé à votre compte — demandez au Super Admin d'en ajouter un pour l'inclure dans le lien.
-                    </p>
+                    <p className="mt-0.5 text-[11px] text-gray-400">{t('admin.noWhatsapp')}</p>
                   )}
 
                   {editingItemId === item.id && (
@@ -706,31 +585,13 @@ export default function AdminDashboard() {
                         disabled={submittingEdit}
                         className="w-full rounded bg-blue-600 py-1.5 text-xs text-white hover:bg-blue-700 disabled:opacity-60"
                       >
-                        {submittingEdit ? 'Enregistrement…' : 'Enregistrer les infos'}
+                        {submittingEdit ? t('admin.saving') : t('admin.save')}
                       </button>
                     </form>
                   )}
                 </div>
               ))}
-              {items.length === 0 && <p className="text-sm text-gray-500">Aucun élément pour le moment.</p>}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-2 text-sm font-semibold text-gray-500">Agents</h2>
-            <div className="space-y-2">
-              {agents.map((agent) => (
-                <div key={agent.id} className="flex items-center justify-between rounded border bg-white p-3 text-sm">
-                  <div>
-                    <div className="font-medium">{agent.fullName}</div>
-                    <div className="text-gray-500">{agent.email}</div>
-                  </div>
-                  <button onClick={() => removeAgent(agent.id)} className="text-red-600 hover:underline">
-                    Retirer
-                  </button>
-                </div>
-              ))}
-              {agents.length === 0 && <p className="text-sm text-gray-500">Aucun agent pour le moment.</p>}
+              {items.length === 0 && <p className="text-sm text-gray-500">{t('admin.noItems')}</p>}
             </div>
           </div>
         </div>
@@ -739,8 +600,8 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between rounded border border-orange-300 bg-orange-50 p-2 text-sm">
               <span>
                 {pendingPosition
-                  ? `Position choisie : ${pendingPosition.lat.toFixed(5)}, ${pendingPosition.lng.toFixed(5)}`
-                  : 'Cliquez sur la carte pour placer le marqueur.'}
+                  ? `${t('admin.positionChosen')} ${pendingPosition.lat.toFixed(5)}, ${pendingPosition.lng.toFixed(5)}`
+                  : t('admin.clickMapPlace')}
                 {positionError && <span className="ml-2 text-red-600">{positionError}</span>}
               </span>
               <div className="flex gap-2">
@@ -750,11 +611,11 @@ export default function AdminDashboard() {
                     disabled={submittingPosition}
                     className="rounded bg-orange-600 px-3 py-1 text-white hover:bg-orange-700 disabled:opacity-60"
                   >
-                    {submittingPosition ? 'Enregistrement…' : 'Confirmer'}
+                    {submittingPosition ? t('admin.saving') : t('admin.confirm')}
                   </button>
                 )}
                 <button onClick={cancelPickingPosition} className="rounded border px-3 py-1 text-gray-600">
-                  Annuler
+                  {t('admin.cancel')}
                 </button>
               </div>
             </div>

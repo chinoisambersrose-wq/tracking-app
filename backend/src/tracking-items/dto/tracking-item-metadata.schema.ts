@@ -46,7 +46,10 @@ export const trackingItemMetadataSchema = z
     // transporteur classique : transporteur, mode, référence, itinéraire...) ---
     carrier: z.string().max(80).optional(), // ex: FedEx, DHL, transporteur interne...
     shipmentMode: z.string().max(40).optional(), // ex: Route, Maritime, Aérien
-    carrierReferenceNo: z.string().max(80).optional(),
+    carrierReferenceNo: z
+      .string()
+      .regex(/^\d{14,}$/, 'La référence transporteur doit contenir au moins 14 chiffres.')
+      .optional(),
     paymentMode: z.string().max(60).optional(), // ex: Virement, Paiement à la livraison
     totalFreight: z.number().nonnegative().max(1_000_000_000).optional(),
     originCity: z.string().max(120).optional(),

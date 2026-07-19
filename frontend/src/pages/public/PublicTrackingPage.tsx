@@ -297,7 +297,7 @@ export default function PublicTrackingPage() {
                   <InfoCell label={t('track.weight')} value={d?.weightKg !== undefined ? `${d.weightKg} kg` : undefined} />
                   <InfoCell label={t('track.carrierRef')} value={d?.carrierReferenceNo} />
                   <InfoCell label={t('track.paymentMode')} value={translate(d?.paymentMode)} />
-                  <InfoCell label={t('track.totalFreight')} value={d?.totalFreight !== undefined ? `${d.totalFreight}` : undefined} />
+                  <InfoCell label={t('track.totalFreight')} value={d?.totalFreight !== undefined ? `${d.totalFreight.toFixed(2)} €` : undefined} />
                   <InfoCell label={t('track.expectedDelivery')} value={d?.expectedDeliveryDate} />
                   <InfoCell label={t('track.pickupDate')} value={d?.pickupDate} />
                   <InfoCell label={t('track.pickupTime')} value={d?.pickupTime} />
@@ -341,7 +341,7 @@ export default function PublicTrackingPage() {
                         <td className="py-2 pr-4">{d?.widthCm ?? '—'}</td>
                         <td className="py-2 pr-4">{d?.heightCm ?? '—'}</td>
                         <td className="py-2 pr-4">{d?.weightKg !== undefined ? `${d.weightKg} kg` : '—'}</td>
-                        <td className="py-2">{d?.declaredValue !== undefined ? d.declaredValue : '—'}</td>
+                        <td className="py-2">{d?.declaredValue !== undefined ? `${d.declaredValue.toFixed(2)} €` : '—'}</td>
                       </tr>
                     </tbody>
                   </table>

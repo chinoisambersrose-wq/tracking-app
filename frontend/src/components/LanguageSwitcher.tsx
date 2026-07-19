@@ -1,8 +1,9 @@
-import { useI18n } from '../lib/i18n';
+import { useI18n, Lang } from '../lib/i18n';
 import { LANGS } from '../lib/translations';
 
-export function LanguageSwitcher({ dark = false }: { dark?: boolean }) {
+export function LanguageSwitcher({ dark = false, langs }: { dark?: boolean; langs?: Lang[] }) {
   const { lang, setLang } = useI18n();
+  const options = langs ? LANGS.filter((l) => langs.includes(l.code)) : LANGS;
 
   return (
     <div
@@ -10,12 +11,12 @@ export function LanguageSwitcher({ dark = false }: { dark?: boolean }) {
         dark ? 'border-white/20 bg-white/5' : 'border-ink-900/10 bg-white'
       }`}
     >
-      {LANGS.map(({ code, label }) => (
+      {options.map(({ code, label, flag }) => (
         <button
           key={code}
           type="button"
           onClick={() => setLang(code)}
-          className={`rounded-full px-2.5 py-1 transition ${
+          className={`flex items-center gap-1 rounded-full px-2.5 py-1 transition ${
             lang === code
               ? 'bg-brand-600 text-white'
               : dark
@@ -23,6 +24,7 @@ export function LanguageSwitcher({ dark = false }: { dark?: boolean }) {
                 : 'text-ink-700/60 hover:text-ink-900'
           }`}
         >
+          <span aria-hidden>{flag}</span>
           {label}
         </button>
       ))}

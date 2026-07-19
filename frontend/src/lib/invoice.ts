@@ -130,7 +130,7 @@ export function generateInvoicePdf(item: InvoiceItem) {
   doc.setTextColor(15, 18, 32);
   doc.text('Montant', marginX, y);
   const amount = m.totalFreight ?? m.declaredValue;
-  doc.text(amount !== undefined ? `${amount.toFixed(2)}` : '—', pageWidth - marginX, y, { align: 'right' });
+  doc.text(amount !== undefined ? `${amount.toFixed(2)} €` : '—', pageWidth - marginX, y, { align: 'right' });
 
   // Pied de page
   const pageHeight = doc.internal.pageSize.getHeight();
