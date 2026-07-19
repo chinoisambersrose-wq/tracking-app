@@ -9,12 +9,17 @@ import {
   TruckIcon,
   ShipIcon,
   PlaneIcon,
+  PackageIcon,
   MapPinIcon,
   ClockIcon,
   ShieldIcon,
   SearchIcon,
   ArrowRightIcon,
   CheckCircleIcon,
+  GlobeIcon,
+  AwardIcon,
+  HeadsetIcon,
+  ChevronDownIcon,
 } from '../../components/icons';
 
 /**
@@ -32,6 +37,12 @@ const PHOTOS = {
     'https://images.unsplash.com/photo-1759389003674-bbc78848a532?q=80&w=800&auto=format&fit=crop',
   serviceAir:
     'https://images.unsplash.com/photo-1769273747778-74eeb3f6d551?q=80&w=800&auto=format&fit=crop',
+  serviceLogistics:
+    'https://images.unsplash.com/photo-1645736315000-6f788915923b?q=80&w=800&auto=format&fit=crop',
+  serviceIndustry:
+    'https://images.unsplash.com/photo-1740914994657-f1cdffdc418e?q=80&w=800&auto=format&fit=crop',
+  serviceCustom:
+    'https://images.unsplash.com/photo-1749244768351-2726dc23d26c?q=80&w=800&auto=format&fit=crop',
 };
 
 function roleHome(role: string) {
@@ -56,12 +67,31 @@ export default function HomePage() {
     { icon: TruckIcon, title: t('services.road.title'), text: t('services.road.text'), photo: PHOTOS.serviceRoad },
     { icon: ShipIcon, title: t('services.sea.title'), text: t('services.sea.text'), photo: PHOTOS.serviceSea },
     { icon: PlaneIcon, title: t('services.air.title'), text: t('services.air.text'), photo: PHOTOS.serviceAir },
+    {
+      icon: PackageIcon,
+      title: t('services.logistics.title'),
+      text: t('services.logistics.text'),
+      photo: PHOTOS.serviceLogistics,
+    },
+    {
+      icon: GlobeIcon,
+      title: t('services.industry.title'),
+      text: t('services.industry.text'),
+      photo: PHOTOS.serviceIndustry,
+    },
+    {
+      icon: AwardIcon,
+      title: t('services.custom.title'),
+      text: t('services.custom.text'),
+      photo: PHOTOS.serviceCustom,
+    },
   ];
 
   const FEATURES = [
     { icon: MapPinIcon, title: t('features.gps.title'), text: t('features.gps.text') },
     { icon: ClockIcon, title: t('features.history.title'), text: t('features.history.text') },
     { icon: ShieldIcon, title: t('features.org.title'), text: t('features.org.text') },
+    { icon: HeadsetIcon, title: t('features.support.title'), text: t('features.support.text') },
   ];
 
   const STATS = [
@@ -76,6 +106,13 @@ export default function HomePage() {
     { icon: PlaneIcon, text: t('network.pointAir') },
   ];
 
+  const FAQS = [
+    { q: t('faq.q1'), a: t('faq.a1') },
+    { q: t('faq.q2'), a: t('faq.a2') },
+    { q: t('faq.q3'), a: t('faq.a3') },
+    { q: t('faq.q4'), a: t('faq.a4') },
+  ];
+
   return (
     <div className="min-h-full bg-white text-ink-900">
       {/* Header */}
@@ -84,8 +121,8 @@ export default function HomePage() {
           <Logo iconClassName="h-8 w-8" />
           <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 sm:flex">
             <a href="#services" className="hover:text-brand-600">{t('nav.services')}</a>
-            <a href="#network" className="hover:text-brand-600">{t('network.kicker')}</a>
-            <a href="#features" className="hover:text-brand-600">{t('nav.features')}</a>
+            <a href="#about" className="hover:text-brand-600">{t('about.kicker')}</a>
+            <a href="#faq" className="hover:text-brand-600">{t('faq.kicker')}</a>
             <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
           </nav>
           <div className="flex items-center gap-3">
@@ -214,6 +251,10 @@ export default function HomePage() {
               <div className="p-6">
                 <h3 className="text-lg font-semibold">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-700/80">{text}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600">
+                  {t('services.readMore')}
+                  <ArrowRightIcon className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                </span>
               </div>
             </div>
           ))}
@@ -260,14 +301,64 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="bg-white py-20">
+      {/* À propos */}
+      <section id="about" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">{t('about.kicker')}</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('about.title')}</h2>
+            <p className="mt-5 text-ink-700/80">{t('about.text1')}</p>
+            <p className="mt-4 text-ink-700/80">{t('about.text2')}</p>
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-md border border-ink-900/10 bg-white p-6">
+              <h3 className="font-semibold">{t('about.senderTitle')}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-700/80">{t('about.senderText')}</p>
+            </div>
+            <div className="rounded-md border border-ink-900/10 bg-ink-900 p-6 text-white">
+              <h3 className="font-semibold">{t('about.receiverTitle')}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-100/70">{t('about.receiverText')}</p>
+              <Link
+                to="/track"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300"
+              >
+                {t('about.receiverCta')}
+                <ArrowRightIcon className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="bg-white py-20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="mb-10 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">{t('faq.kicker')}</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('faq.title')}</h2>
+          </div>
+          <div className="divide-y divide-ink-900/10 rounded-md border border-ink-900/10">
+            {FAQS.map(({ q, a }) => (
+              <details key={q} className="group p-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                  {q}
+                  <ChevronDownIcon className="h-4 w-4 shrink-0 text-ink-700/50 transition group-open:rotate-180" />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-ink-700/80">{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pourquoi nous choisir */}
+      <section id="features" className="bg-gray-50 py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-12 max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">{t('features.kicker')}</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('features.title')}</h2>
           </div>
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-md border border-ink-900/10 bg-white p-6">
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-md bg-brand-50 text-brand-600">
@@ -299,12 +390,46 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-ink-900/10 bg-white py-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-ink-700/70 sm:flex-row sm:px-6">
-          <span>© {new Date().getFullYear()} TransEuroGoo — {t('footer.rights')}</span>
-          <div className="flex gap-6">
-            <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
-            <Link to={user ? roleHome(user.role) : '/login'} className="text-ink-700/40 hover:text-ink-700/70">
+      <footer className="border-t border-ink-900/10 bg-ink-900 text-ink-100/70">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_0.8fr_1fr]">
+          <div>
+            <Logo variant="light" tagline />
+            <p className="mt-4 max-w-xs text-sm text-ink-100/60">{t('footer.tagline')}</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-white">{t('footer.linksTitle')}</h3>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li><a href="#services" className="hover:text-white">{t('nav.services')}</a></li>
+              <li><a href="#about" className="hover:text-white">{t('about.kicker')}</a></li>
+              <li><a href="#faq" className="hover:text-white">{t('faq.kicker')}</a></li>
+              <li><Link to="/track" className="hover:text-white">{t('nav.track')}</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-white">{t('footer.newsletterTitle')}</h3>
+            <p className="mt-4 text-sm text-ink-100/60">{t('footer.newsletterText')}</p>
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="mt-4 flex overflow-hidden rounded-md border border-white/15"
+            >
+              <input
+                type="email"
+                placeholder={t('footer.newsletterPlaceholder')}
+                className="w-full bg-transparent px-3 py-2 text-sm text-white placeholder:text-ink-100/40 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="shrink-0 bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
+              >
+                {t('footer.newsletterButton')}
+              </button>
+            </form>
+          </div>
+        </div>
+        <div className="border-t border-white/10">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 text-xs text-ink-100/50 sm:flex-row sm:px-6">
+            <span>© {new Date().getFullYear()} TransEuroGo — {t('footer.rights')}</span>
+            <Link to={user ? roleHome(user.role) : '/login'} className="text-ink-100/30 hover:text-ink-100/60">
               {user ? t('nav.myspace') : t('nav.login')}
             </Link>
           </div>

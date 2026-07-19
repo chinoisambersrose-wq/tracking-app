@@ -2,37 +2,48 @@ import { SVGProps } from 'react';
 import { Link } from 'react-router-dom';
 
 /**
- * Identité visuelle TransEuroGoo — logo maison (pas d'image externe).
- * Le pictogramme combine un pin de géolocalisation et une route/flèche de
- * mouvement, pour incarner à la fois "Trans" (transport) et le suivi GPS
- * ("Goo" / géolocalisation) au cœur du produit.
+ * Identité visuelle TransEuroGo — recréation fidèle du logo officiel fourni
+ * par le client : badge circulaire à double anneau (orange + anthracite en
+ * "croissants" superposés) autour d'un pictogramme camion + flèche de
+ * mouvement, avec le nom "TransEuroGo" et la signature "Express Delivery".
+ * Dessiné en SVG maison (pas d'image raster) pour rester net à toute taille.
  */
 export function LogoMark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 40 40" {...props}>
-      <defs>
-        <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#fb923c" />
-          <stop offset="100%" stopColor="#ea580c" />
-        </linearGradient>
-      </defs>
-      <rect width="40" height="40" rx="11" fill="url(#logoGrad)" />
-      {/* route */}
-      <path
-        d="M8 27 C 14 22, 16 18, 22 13"
+      {/* Anneau extérieur orange (croissant) */}
+      <circle
+        cx="20"
+        cy="20"
+        r="17"
         fill="none"
-        stroke="white"
-        strokeOpacity="0.55"
-        strokeWidth="2.4"
+        stroke="#ea580c"
+        strokeWidth="3.2"
         strokeLinecap="round"
-        strokeDasharray="0.5 5.2"
+        strokeDasharray="80 27"
+        transform="rotate(-40 20 20)"
       />
-      {/* pin de géolocalisation */}
-      <path
-        d="M24 8c4.4 0 8 3.6 8 8 0 6-8 14.5-8 14.5S16 22 16 16c0-4.4 3.6-8 8-8z"
-        fill="white"
+      {/* Anneau intérieur anthracite (croissant, décalé) */}
+      <circle
+        cx="20"
+        cy="20"
+        r="17"
+        fill="none"
+        stroke="#182238"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeDasharray="58 49"
+        transform="rotate(75 20 20)"
       />
-      <circle cx="24" cy="16" r="3.4" fill="#ea580c" />
+      {/* Pictogramme camion + flèche de mouvement, au centre */}
+      <g transform="translate(8.5, 13)" stroke="#ea580c" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M0.5 1.5h11v9h-11z" />
+        <path d="M2 6h5.5" />
+        <path d="M5.5 3.8L8 6l-2.5 2.2" />
+        <path d="M11.5 5h3.2l3.3 3v2.5h-6.5z" />
+        <circle cx="4" cy="12.3" r="1.5" fill="#ea580c" stroke="none" />
+        <circle cx="14.5" cy="12.3" r="1.5" fill="#ea580c" stroke="none" />
+      </g>
     </svg>
   );
 }
@@ -42,18 +53,24 @@ interface LogoProps {
   className?: string;
   iconClassName?: string;
   to?: string | null;
+  tagline?: boolean;
 }
 
 /** Icône + nom de marque, prêt à l'emploi dans les en-têtes. */
-export function Logo({ variant = 'dark', className = '', iconClassName = 'h-9 w-9', to = '/' }: LogoProps) {
+export function Logo({ variant = 'dark', className = '', iconClassName = 'h-9 w-9', to = '/', tagline = false }: LogoProps) {
   const textBase = variant === 'dark' ? 'text-ink-900' : 'text-white';
-  const accent = variant === 'dark' ? 'text-brand-600' : 'text-brand-400';
+  const taglineColor = variant === 'dark' ? 'text-ink-700/50' : 'text-ink-100/50';
 
   const content = (
-    <span className={`flex items-center gap-2.5 text-lg font-bold tracking-tight ${textBase} ${className}`}>
-      <LogoMark className={`${iconClassName} shrink-0 drop-shadow-sm`} />
+    <span className={`flex items-center gap-2.5 ${className}`}>
+      <LogoMark className={`${iconClassName} shrink-0`} />
       <span className="leading-none">
-        TransEuro<span className={accent}>Goo</span>
+        <span className={`block text-lg font-bold tracking-tight ${textBase}`}>TransEuroGo</span>
+        {tagline && (
+          <span className={`block text-[10px] font-medium uppercase tracking-widest ${taglineColor}`}>
+            Express Delivery
+          </span>
+        )}
       </span>
     </span>
   );

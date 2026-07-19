@@ -60,6 +60,16 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'services.sea.text': 'Expéditions maritimes fiables pour vos envois volumineux, suivies de bout en bout.',
     'services.air.title': 'Fret aérien',
     'services.air.text': 'Solutions express par voie aérienne pour vos envois urgents et prioritaires.',
+    'services.logistics.title': 'Solutions logistiques',
+    'services.logistics.text':
+      "Gestion de bout en bout de votre chaîne d'approvisionnement : entreposage, préparation de commandes et distribution.",
+    'services.industry.title': 'Solutions par secteur',
+    'services.industry.text':
+      'Des flux logistiques adaptés à votre activité : e-commerce, industrie, santé, événementiel.',
+    'services.custom.title': 'Solutions sur mesure',
+    'services.custom.text':
+      'Chaque chaîne logistique est unique : nous construisons avec vous un dispositif adapté à vos contraintes.',
+    'services.readMore': 'En savoir plus',
 
     'features.kicker': 'Pourquoi nous choisir',
     'features.title': 'Conçu pour la transparence',
@@ -69,6 +79,46 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'features.history.text': "Chaque étape du transport est horodatée et consultable.",
     'features.org.title': 'Multi-organisations sécurisées',
     'features.org.text': 'Chaque client dispose de son espace isolé et de ses agents dédiés.',
+    'features.support.title': 'Support disponible 24/7',
+    'features.support.text': 'Une équipe joignable à tout moment pour répondre à vos questions sur un envoi.',
+
+    'about.kicker': 'Qui sommes-nous',
+    'about.title': "Entre le point de départ et l'arrivée, il y a TransEuroGo",
+    'about.text1':
+      'TransEuroGo accompagne particuliers et entreprises dans le transport et le suivi de leurs colis et véhicules, par route, mer et air.',
+    'about.text2':
+      "Présents dans plus de 40 pays, nous combinons un réseau de transporteurs de confiance et une plateforme de suivi en temps réel, pour une visibilité totale du dépôt jusqu'à la livraison.",
+    'about.senderTitle': 'Vous êtes expéditeur ?',
+    'about.senderText':
+      'Contactez votre interlocuteur TransEuroGo pour enregistrer un envoi : il vous fournira un lien de suivi à partager avec votre destinataire.',
+    'about.senderCta': 'Créer et suivre un envoi',
+    'about.receiverTitle': 'Vous êtes destinataire ?',
+    'about.receiverText':
+      "Entrez le code de suivi reçu de l'expéditeur pour voir la position et le statut de votre colis en temps réel, sans créer de compte.",
+    'about.receiverCta': 'Suivre mon colis en direct',
+
+    'faq.kicker': 'Questions fréquentes',
+    'faq.title': "Tout ce qu'il faut savoir",
+    'faq.q1': 'Comment suivre mon colis ?',
+    'faq.a1':
+      'Entrez votre code de suivi sur la page d\'accueil ou la page "Suivre un envoi" : le statut, la position et l\'historique complet s\'affichent en temps réel, sans création de compte.',
+    'faq.q2': 'Quels modes de transport proposez-vous ?',
+    'faq.a2':
+      'Route, mer et air, selon l\'urgence et le volume de votre envoi. Chaque mode est suivi de bout en bout sur la même plateforme.',
+    'faq.q3': 'Dans quels pays livrez-vous ?',
+    'faq.a3':
+      'Notre réseau de transporteurs couvre plus de 40 pays, en Europe et à l\'international, avec des partenaires locaux à chaque étape.',
+    'faq.q4': "Comment contacter l'expéditeur ou le transporteur ?",
+    'faq.a4':
+      "Un bouton de contact WhatsApp apparaît sur la page de suivi lorsque l'administrateur en charge de votre envoi a associé un numéro à votre colis.",
+
+    'footer.tagline': 'Route, mer, air : vos envois suivis de bout en bout.',
+    'footer.linksTitle': 'Navigation',
+    'footer.contactTitle': 'Contact',
+    'footer.newsletterTitle': 'Restez informés',
+    'footer.newsletterText': 'Recevez nos actualités et nouveautés produit.',
+    'footer.newsletterPlaceholder': 'Votre adresse email',
+    'footer.newsletterButton': "S'abonner",
 
     'cta.title': 'Prêt à suivre votre envoi ?',
     'cta.subtitle': "Entrez simplement votre code de suivi, aucune inscription requise.",
@@ -240,6 +290,16 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'services.sea.text': 'Reliable ocean shipments for large freight, tracked end to end.',
     'services.air.title': 'Air freight',
     'services.air.text': 'Express air solutions for your urgent and priority shipments.',
+    'services.logistics.title': 'Logistics solutions',
+    'services.logistics.text':
+      'End-to-end supply chain management: warehousing, order preparation and distribution.',
+    'services.industry.title': 'Industry solutions',
+    'services.industry.text':
+      'Logistics flows tailored to your business: e-commerce, industry, healthcare, events.',
+    'services.custom.title': 'Custom solutions',
+    'services.custom.text':
+      'Every supply chain is unique — we build a setup with you that fits your constraints.',
+    'services.readMore': 'Read more',
 
     'features.kicker': 'Why choose us',
     'features.title': 'Built for transparency',
@@ -249,6 +309,46 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'features.history.text': 'Every step of the transport is timestamped and available.',
     'features.org.title': 'Secure multi-organization',
     'features.org.text': 'Each client has an isolated space with dedicated agents.',
+    'features.support.title': '24/7 support',
+    'features.support.text': 'A team reachable at any time to answer your questions about a shipment.',
+
+    'about.kicker': 'About us',
+    'about.title': 'Between the point of departure and the destination, there is TransEuroGo',
+    'about.text1':
+      'TransEuroGo supports individuals and businesses in shipping and tracking their parcels and vehicles, by road, sea and air.',
+    'about.text2':
+      'Present in over 40 countries, we combine a network of trusted carriers with a real-time tracking platform, for full visibility from pickup to delivery.',
+    'about.senderTitle': 'Are you a sender?',
+    'about.senderText':
+      'Contact your TransEuroGo representative to register a shipment: they will provide a tracking link to share with your recipient.',
+    'about.senderCta': 'Create and track a shipment',
+    'about.receiverTitle': 'Are you a receiver?',
+    'about.receiverText':
+      "Enter the tracking code you received from the sender to see your parcel's position and status in real time, no account needed.",
+    'about.receiverCta': 'Track my parcel live',
+
+    'faq.kicker': 'Frequently asked questions',
+    'faq.title': 'Everything you need to know',
+    'faq.q1': 'How do I track my parcel?',
+    'faq.a1':
+      'Enter your tracking code on the homepage or the "Track a shipment" page: status, position and full history are shown in real time, no account needed.',
+    'faq.q2': 'Which modes of transport do you offer?',
+    'faq.a2':
+      'Road, sea and air, depending on the urgency and volume of your shipment. Every mode is tracked end to end on the same platform.',
+    'faq.q3': 'Which countries do you deliver to?',
+    'faq.a3':
+      'Our carrier network covers over 40 countries, across Europe and internationally, with local partners at every step.',
+    'faq.q4': 'How do I contact the sender or the carrier?',
+    'faq.a4':
+      "A WhatsApp contact button appears on the tracking page when the admin in charge of your shipment has linked a number to your parcel.",
+
+    'footer.tagline': 'Road, sea, air: your shipments tracked end to end.',
+    'footer.linksTitle': 'Navigation',
+    'footer.contactTitle': 'Contact',
+    'footer.newsletterTitle': 'Stay informed',
+    'footer.newsletterText': 'Get our news and product updates.',
+    'footer.newsletterPlaceholder': 'Your email address',
+    'footer.newsletterButton': 'Subscribe',
 
     'cta.title': 'Ready to track your shipment?',
     'cta.subtitle': 'Just enter your tracking code — no account required.',
@@ -420,6 +520,16 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'services.sea.text': 'Zuverlässige Seesendungen für große Frachten, lückenlos verfolgt.',
     'services.air.title': 'Luftfracht',
     'services.air.text': 'Express-Luftlösungen für Ihre dringenden und vorrangigen Sendungen.',
+    'services.logistics.title': 'Logistiklösungen',
+    'services.logistics.text':
+      'End-to-End-Verwaltung Ihrer Lieferkette: Lagerung, Kommissionierung und Distribution.',
+    'services.industry.title': 'Branchenlösungen',
+    'services.industry.text':
+      'Logistikabläufe passend zu Ihrer Branche: E-Commerce, Industrie, Gesundheitswesen, Events.',
+    'services.custom.title': 'Maßgeschneiderte Lösungen',
+    'services.custom.text':
+      'Jede Lieferkette ist einzigartig — wir entwickeln mit Ihnen ein System, das zu Ihren Anforderungen passt.',
+    'services.readMore': 'Mehr erfahren',
 
     'features.kicker': 'Warum uns wählen',
     'features.title': 'Für Transparenz entwickelt',
@@ -429,6 +539,46 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'features.history.text': 'Jeder Transportschritt wird zeitgestempelt und ist abrufbar.',
     'features.org.title': 'Sichere Mehrorganisation',
     'features.org.text': 'Jeder Kunde verfügt über einen isolierten Bereich mit eigenen Mitarbeitern.',
+    'features.support.title': '24/7-Support',
+    'features.support.text': 'Ein Team, das jederzeit für Fragen zu Ihrer Sendung erreichbar ist.',
+
+    'about.kicker': 'Über uns',
+    'about.title': 'Zwischen Abfahrts- und Zielort steht TransEuroGo',
+    'about.text1':
+      'TransEuroGo unterstützt Privatpersonen und Unternehmen beim Versand und der Verfolgung ihrer Pakete und Fahrzeuge, auf der Straße, zur See und in der Luft.',
+    'about.text2':
+      'Mit Präsenz in über 40 Ländern verbinden wir ein Netzwerk vertrauenswürdiger Spediteure mit einer Echtzeit-Tracking-Plattform für volle Transparenz von der Abholung bis zur Zustellung.',
+    'about.senderTitle': 'Sind Sie Absender?',
+    'about.senderText':
+      'Wenden Sie sich an Ihren TransEuroGo-Ansprechpartner, um eine Sendung zu erfassen: Sie erhalten einen Tracking-Link zum Teilen mit dem Empfänger.',
+    'about.senderCta': 'Sendung erstellen und verfolgen',
+    'about.receiverTitle': 'Sind Sie Empfänger?',
+    'about.receiverText':
+      'Geben Sie die vom Absender erhaltene Sendungsnummer ein, um Position und Status Ihres Pakets in Echtzeit zu sehen, ohne Konto.',
+    'about.receiverCta': 'Mein Paket live verfolgen',
+
+    'faq.kicker': 'Häufige Fragen',
+    'faq.title': 'Alles, was Sie wissen müssen',
+    'faq.q1': 'Wie verfolge ich mein Paket?',
+    'faq.a1':
+      'Geben Sie Ihre Sendungsnummer auf der Startseite oder der Seite „Sendung verfolgen" ein: Status, Position und vollständiger Verlauf werden in Echtzeit angezeigt, ohne Konto.',
+    'faq.q2': 'Welche Transportarten bieten Sie an?',
+    'faq.a2':
+      'Straße, See und Luft, je nach Dringlichkeit und Umfang Ihrer Sendung. Jede Transportart wird lückenlos auf derselben Plattform verfolgt.',
+    'faq.q3': 'In welche Länder liefern Sie?',
+    'faq.a3':
+      'Unser Speditionsnetzwerk deckt über 40 Länder ab, in Europa und international, mit lokalen Partnern bei jedem Schritt.',
+    'faq.q4': 'Wie kontaktiere ich den Absender oder den Spediteur?',
+    'faq.a4':
+      'Eine WhatsApp-Kontaktschaltfläche erscheint auf der Sendungsseite, wenn der zuständige Admin Ihrer Sendung eine Nummer zugeordnet hat.',
+
+    'footer.tagline': 'Straße, See, Luft: Ihre Sendungen lückenlos verfolgt.',
+    'footer.linksTitle': 'Navigation',
+    'footer.contactTitle': 'Kontakt',
+    'footer.newsletterTitle': 'Bleiben Sie informiert',
+    'footer.newsletterText': 'Erhalten Sie unsere Neuigkeiten und Produktupdates.',
+    'footer.newsletterPlaceholder': 'Ihre E-Mail-Adresse',
+    'footer.newsletterButton': 'Abonnieren',
 
     'cta.title': 'Bereit, Ihre Sendung zu verfolgen?',
     'cta.subtitle': 'Geben Sie einfach Ihre Sendungsnummer ein — keine Registrierung erforderlich.',

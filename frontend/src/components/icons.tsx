@@ -119,6 +119,53 @@ export function WhatsAppIcon(props: IconProps) {
   );
 }
 
+export function GlobeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3c2.8 2.6 4.2 5.7 4.2 9s-1.4 6.4-4.2 9c-2.8-2.6-4.2-5.7-4.2-9s1.4-6.4 4.2-9z" />
+    </svg>
+  );
+}
+
+export function MailIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+export function AwardIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="8" r="5" />
+      <path d="M8.5 12.5L7 22l5-3 5 3-1.5-9.5" />
+    </svg>
+  );
+}
+
+export function HeadsetIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
+      <rect x="2.5" y="13" width="4.5" height="6" rx="1.5" />
+      <rect x="17" y="13" width="4.5" height="6" rx="1.5" />
+      <path d="M19.5 19v1a3 3 0 0 1-3 3h-3" />
+    </svg>
+  );
+}
+
 export function CheckCircleIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

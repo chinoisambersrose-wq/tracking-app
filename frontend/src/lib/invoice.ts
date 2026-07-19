@@ -58,7 +58,7 @@ export function generateInvoicePdf(item: InvoiceItem) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('TransEuroGoo', marginX, 7);
+  doc.text('TransEuroGo', marginX, 7);
 
   doc.setTextColor(15, 18, 32);
   y = 24;
@@ -137,7 +137,7 @@ export function generateInvoicePdf(item: InvoiceItem) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(150, 150, 150);
-  doc.text('Document généré automatiquement — TransEuroGoo', marginX, pageHeight - 10);
+  doc.text('Document généré automatiquement — TransEuroGo', marginX, pageHeight - 10);
 
   doc.save(`facture-${item.publicCode}.pdf`);
 }

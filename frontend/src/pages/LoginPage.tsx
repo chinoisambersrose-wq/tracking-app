@@ -35,7 +35,7 @@ export default function LoginPage() {
     <div className="flex h-full items-center justify-center bg-ink-900 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex justify-center">
-          <Logo variant="light" />
+          <Logo variant="light" tagline />
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-8 shadow-glow">
           <div>
