@@ -94,10 +94,23 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* Hero — photo plein cadre, texte superposé */}
       <section className="relative overflow-hidden border-b border-white/5 bg-ink-900 text-white">
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          {/* Colonne texte */}
+        {/* Photo de fond */}
+        <div className="absolute inset-0">
+          <img
+            src={PHOTOS.heroTruck}
+            alt="Camion de transport sur la route"
+            className="h-full w-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink-900/95 via-ink-900/75 to-ink-900/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-900/90 via-transparent to-ink-900/40" />
+          <GpsOverlay tone="light" className="absolute inset-0 h-full w-full opacity-90" />
+        </div>
+
+        {/* Contenu */}
+        <div className="relative mx-auto flex min-h-[560px] max-w-6xl items-center px-4 py-16 sm:px-6 sm:py-20">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-400">
               {t('hero.badge')}
@@ -148,52 +161,28 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Colonne photo */}
-          <div className="relative hidden lg:block">
-            <div className="relative overflow-hidden rounded-md border border-white/10">
-              <img
-                src={PHOTOS.heroTruck}
-                alt="Camion de transport sur la route"
-                className="h-[440px] w-full object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-ink-900/10" />
-              <GpsOverlay tone="light" className="absolute inset-0 h-full w-full" />
-
-              {/* Bandeau d'informations intégré (pas de carte flottante hors cadre) */}
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-white/10 bg-ink-900/70 px-5 py-3 text-white">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <div>
-                    <p className="text-xs font-semibold leading-none">{t('hero.liveBadge')}</p>
-                    <p className="mt-0.5 text-[11px] text-ink-100/60">{t('hero.liveBadgeSub')}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-right">
-                  <div>
-                    <p className="text-xs font-semibold leading-none">{t('hero.etaBadge')}</p>
-                    <p className="mt-0.5 text-[11px] text-ink-100/60">{t('hero.etaBadgeSub')}</p>
-                  </div>
-                  <ClockIcon className="h-4 w-4 text-brand-400" />
-                </div>
+        {/* Bandeau d'informations en bas du hero (en transit / ETA) */}
+        <div className="relative border-t border-white/10 bg-ink-900/70">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold leading-none">{t('hero.liveBadge')}</p>
+                <p className="mt-0.5 text-[11px] text-ink-100/60">{t('hero.liveBadgeSub')}</p>
               </div>
             </div>
-          </div>
-
-          {/* Photo mobile (pleine largeur, en dessous du texte) */}
-          <div className="relative -mx-4 overflow-hidden border-y border-white/10 lg:hidden">
-            <img
-              src={PHOTOS.heroTruck}
-              alt="Camion de transport sur la route"
-              className="h-56 w-full object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-900/70 to-transparent" />
-            <GpsOverlay tone="light" className="absolute inset-0 h-full w-full" />
+            <div className="flex items-center gap-2">
+              <ClockIcon className="h-4 w-4 text-brand-400" />
+              <div>
+                <p className="text-xs font-semibold leading-none">{t('hero.etaBadge')}</p>
+                <p className="mt-0.5 text-[11px] text-ink-100/60">{t('hero.etaBadgeSub')}</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
