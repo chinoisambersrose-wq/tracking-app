@@ -113,6 +113,57 @@ export function TruckHeroIllustration(props: IllustrationProps) {
   );
 }
 
+interface GpsOverlayProps extends IllustrationProps {
+  tone?: 'light' | 'dark';
+}
+
+/**
+ * Calque transparent (pins GPS + itinéraires pointillés) à superposer sur une
+ * vraie photo, pour recréer l'effet "réalité augmentée / suivi en direct" des
+ * visuels de référence, sans dépendre d'une image tierce protégée.
+ */
+export function GpsOverlay({ tone = 'light', ...props }: GpsOverlayProps) {
+  const line = tone === 'light' ? '#ffffff' : '#ea580c';
+  const pinFill = tone === 'light' ? '#ffffff' : '#ea580c';
+  const pinDot = tone === 'light' ? '#ea580c' : '#ffffff';
+
+  return (
+    <svg viewBox="0 0 600 400" fill="none" {...props}>
+      <path
+        d="M55 330 C 130 275, 190 250, 250 205 S 370 130, 425 95"
+        stroke={line}
+        strokeOpacity="0.75"
+        strokeWidth="2.5"
+        strokeDasharray="1.5 9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M300 400 C 335 340, 350 300, 405 250 S 470 170, 500 140"
+        stroke={line}
+        strokeOpacity="0.4"
+        strokeWidth="2"
+        strokeDasharray="1.5 9"
+        strokeLinecap="round"
+      />
+      <circle cx="55" cy="330" r="4.5" fill={line} />
+      <circle cx="250" cy="205" r="4.5" fill={line} />
+      <circle cx="405" cy="250" r="4.5" fill={line} opacity="0.7" />
+
+      <g transform="translate(405, 65)">
+        <circle cx="20" cy="20" r="9" fill={pinFill} opacity="0.15">
+          <animate attributeName="r" values="9;24;9" dur="2.4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.25;0;0.25" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <path
+          d="M20 4c9.4 0 17 7.6 17 17 0 12.7-17 27-17 27S3 33.7 3 21C3 11.6 10.6 4 20 4z"
+          fill={pinFill}
+        />
+        <circle cx="20" cy="20" r="7" fill={pinDot} />
+      </g>
+    </svg>
+  );
+}
+
 export function ShipHeroIllustration(props: IllustrationProps) {
   return (
     <svg viewBox="0 0 900 460" {...props}>

@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../lib/i18n';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { Logo } from '../../components/Logo';
-import { TruckHeroIllustration, ShipHeroIllustration } from '../../components/illustrations';
+import { GpsOverlay } from '../../components/illustrations';
 import {
   TruckIcon,
   ShipIcon,
@@ -16,6 +16,23 @@ import {
   ArrowRightIcon,
   CheckCircleIcon,
 } from '../../components/icons';
+
+/**
+ * Photos réelles libres de droit (licence Unsplash — usage commercial libre,
+ * sans attribution requise). Servies directement depuis le CDN Unsplash.
+ */
+const PHOTOS = {
+  heroTruck:
+    'https://images.unsplash.com/photo-1720811559395-3ed8d1b16649?q=80&w=1400&auto=format&fit=crop',
+  networkShip:
+    'https://images.unsplash.com/photo-1758549683132-72ac09a3d5b5?q=80&w=1400&auto=format&fit=crop',
+  serviceRoad:
+    'https://images.unsplash.com/photo-1708193203896-ba0630862bb6?q=80&w=800&auto=format&fit=crop',
+  serviceSea:
+    'https://images.unsplash.com/photo-1759389003674-bbc78848a532?q=80&w=800&auto=format&fit=crop',
+  serviceAir:
+    'https://images.unsplash.com/photo-1769273747778-74eeb3f6d551?q=80&w=800&auto=format&fit=crop',
+};
 
 function roleHome(role: string) {
   if (role === 'SUPER_ADMIN') return '/super-admin';
@@ -36,9 +53,9 @@ export default function HomePage() {
   }
 
   const SERVICES = [
-    { icon: TruckIcon, title: t('services.road.title'), text: t('services.road.text') },
-    { icon: ShipIcon, title: t('services.sea.title'), text: t('services.sea.text') },
-    { icon: PlaneIcon, title: t('services.air.title'), text: t('services.air.text') },
+    { icon: TruckIcon, title: t('services.road.title'), text: t('services.road.text'), photo: PHOTOS.serviceRoad },
+    { icon: ShipIcon, title: t('services.sea.title'), text: t('services.sea.text'), photo: PHOTOS.serviceSea },
+    { icon: PlaneIcon, title: t('services.air.title'), text: t('services.air.text'), photo: PHOTOS.serviceAir },
   ];
 
   const FEATURES = [
@@ -156,10 +173,17 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Colonne illustration */}
+          {/* Colonne photo */}
           <div className="relative hidden lg:block">
-            <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
-              <TruckHeroIllustration className="h-auto w-full" />
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+              <img
+                src={PHOTOS.heroTruck}
+                alt="Camion de transport sur la route"
+                className="h-[480px] w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink-900/75 via-ink-900/10 to-ink-900/20" />
+              <GpsOverlay tone="light" className="absolute inset-0 h-full w-full" />
             </div>
 
             {/* Badge flottant : en transit */}
@@ -186,9 +210,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Illustration mobile (pleine largeur, en dessous du texte) */}
-          <div className="-mx-4 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 lg:hidden">
-            <TruckHeroIllustration className="h-auto w-full" />
+          {/* Photo mobile (pleine largeur, en dessous du texte) */}
+          <div className="relative -mx-4 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 lg:hidden">
+            <img
+              src={PHOTOS.heroTruck}
+              alt="Camion de transport sur la route"
+              className="h-56 w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-900/60 to-transparent" />
+            <GpsOverlay tone="light" className="absolute inset-0 h-full w-full" />
           </div>
         </div>
       </section>
@@ -200,16 +231,27 @@ export default function HomePage() {
           <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t('services.title')}</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map(({ icon: Icon, title, text }) => (
+          {SERVICES.map(({ icon: Icon, title, text, photo }) => (
             <div
               key={title}
-              className="group rounded-2xl border border-ink-900/5 bg-white p-6 shadow-card transition hover:-translate-y-1 hover:shadow-glow"
+              className="group overflow-hidden rounded-2xl border border-ink-900/5 bg-white shadow-card transition hover:-translate-y-1 hover:shadow-glow"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
-                <Icon className="h-6 w-6" />
+              <div className="relative h-36 overflow-hidden">
+                <img
+                  src={photo}
+                  alt=""
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-ink-900/0 to-transparent" />
+                <div className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 text-brand-600 shadow">
+                  <Icon className="h-5 w-5" />
+                </div>
               </div>
-              <h3 className="text-lg font-semibold">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-700/80">{text}</p>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-700/80">{text}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -234,8 +276,15 @@ export default function HomePage() {
             </ul>
           </div>
           <div className="relative">
-            <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
-              <ShipHeroIllustration className="h-auto w-full" />
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+              <img
+                src={PHOTOS.networkShip}
+                alt="Porte-conteneurs en mer au coucher du soleil"
+                className="h-[380px] w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink-900/70 via-ink-900/10 to-transparent" />
+              <GpsOverlay tone="light" className="absolute inset-0 h-full w-full" />
             </div>
             <div className="absolute -bottom-6 left-6 flex items-center gap-3 rounded-xl bg-white/95 px-4 py-3 text-ink-900 shadow-glow backdrop-blur sm:left-10">
               <span className="relative flex h-2.5 w-2.5">
