@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../lib/i18n';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { Logo } from '../../components/Logo';
 import { TruckHeroIllustration, ShipHeroIllustration } from '../../components/illustrations';
 import {
   TruckIcon,
   ShipIcon,
   PlaneIcon,
-  PackageIcon,
   MapPinIcon,
   ClockIcon,
   ShieldIcon,
@@ -64,12 +64,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-ink-800/10 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-600 text-white">
-              <PackageIcon className="h-5 w-5" />
-            </span>
-            Tracking<span className="text-brand-600">App</span>
-          </Link>
+          <Logo iconClassName="h-8 w-8" />
           <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 sm:flex">
             <a href="#services" className="hover:text-brand-600">{t('nav.services')}</a>
             <a href="#network" className="hover:text-brand-600">{t('network.kicker')}</a>
@@ -294,7 +289,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-ink-900/10 bg-white py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-ink-700/70 sm:flex-row sm:px-6">
-          <span>© {new Date().getFullYear()} TrackingApp — {t('footer.rights')}</span>
+          <span>© {new Date().getFullYear()} TransEuroGoo — {t('footer.rights')}</span>
           <div className="flex gap-6">
             <Link to="/track" className="hover:text-brand-600">{t('nav.track')}</Link>
           </div>

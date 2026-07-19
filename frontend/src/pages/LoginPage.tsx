@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { PackageIcon } from '../components/icons';
+import { Logo } from '../components/Logo';
 
 function roleHome(role: string) {
   if (role === 'SUPER_ADMIN') return '/super-admin';
@@ -34,12 +34,9 @@ export default function LoginPage() {
   return (
     <div className="flex h-full items-center justify-center bg-ink-900 px-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2 text-lg font-bold text-white">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-600">
-            <PackageIcon className="h-5 w-5" />
-          </span>
-          Tracking<span className="text-brand-500">App</span>
-        </Link>
+        <div className="mb-8 flex justify-center">
+          <Logo variant="light" />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-8 shadow-glow">
           <div>
             <h1 className="text-xl font-semibold text-ink-900">Espace professionnel</h1>

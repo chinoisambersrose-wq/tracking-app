@@ -5,6 +5,7 @@ import { MapView } from '../../components/MapView';
 import { useI18n } from '../../lib/i18n';
 import { useDynamicTranslation } from '../../lib/useDynamicTranslation';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { Logo } from '../../components/Logo';
 import {
   SearchIcon,
   PackageIcon,
@@ -169,12 +170,7 @@ export default function PublicTrackingPage() {
       {/* Header */}
       <header className="border-b border-ink-900/10 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-600 text-white">
-              <PackageIcon className="h-5 w-5" />
-            </span>
-            Tracking<span className="text-brand-600">App</span>
-          </Link>
+          <Logo iconClassName="h-8 w-8" />
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link to="/login" className="text-sm font-medium text-ink-700 hover:text-brand-600">
