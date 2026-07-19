@@ -26,6 +26,38 @@ export interface InvoiceItem {
   metadata?: InvoiceMetadata | null;
 }
 
+/**
+ * Dessine le logo TransEuroGo (badge circulaire orange + pictogramme camion)
+ * en vectoriel pur jsPDF — aucune image externe requise, cohérent avec le
+ * logo affiché sur la plateforme (voir components/Logo.tsx).
+ */
+function drawLogo(doc: jsPDF, x: number, y: number, size: number) {
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+
+  // Badge circulaire orange
+  doc.setFillColor(234, 88, 12); // brand-600
+  doc.circle(cx, cy, size / 2, 'F');
+
+  // Caisse du camion (blanc)
+  doc.setFillColor(255, 255, 255);
+  doc.rect(x + size * 0.2, y + size * 0.36, size * 0.42, size * 0.3, 'F');
+  // Cabine (blanc)
+  doc.rect(x + size * 0.64, y + size * 0.46, size * 0.18, size * 0.2, 'F');
+  // Flèche de mouvement (orange, en creux dans la caisse)
+  doc.setFillColor(234, 88, 12);
+  doc.triangle(
+    x + size * 0.3, y + size * 0.41,
+    x + size * 0.3, y + size * 0.61,
+    x + size * 0.44, y + size * 0.51,
+    'F',
+  );
+  // Roues (anthracite)
+  doc.setFillColor(24, 34, 56);
+  doc.circle(x + size * 0.34, y + size * 0.72, size * 0.07, 'F');
+  doc.circle(x + size * 0.72, y + size * 0.72, size * 0.07, 'F');
+}
+
 /** Dessine un code-barres décoratif (même algorithme que la page de suivi publique). */
 function drawBarcode(doc: jsPDF, code: string, x: number, y: number, height: number) {
   let cursor = x;
@@ -52,16 +84,23 @@ export function generateInvoicePdf(item: InvoiceItem) {
   const marginX = 15;
   let y = 18;
 
-  // En-tête
-  doc.setFillColor(234, 88, 12); // brand-600
-  doc.rect(0, 0, pageWidth, 10, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(11);
+  // En-tête : logo + nom de marque
+  const logoSize = 12;
+  drawLogo(doc, marginX, 8, logoSize);
+  doc.setTextColor(15, 18, 32);
+  doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.text('TransEuroGo', marginX, 7);
+  doc.text('TransEuroGo', marginX + logoSize + 4, 14.5);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(140, 140, 140);
+  doc.text('EXPRESS DELIVERY', marginX + logoSize + 4, 18.5);
+
+  doc.setDrawColor(230, 230, 230);
+  doc.line(marginX, 25, pageWidth - marginX, 25);
 
   doc.setTextColor(15, 18, 32);
-  y = 24;
+  y = 35;
   doc.setFontSize(18);
   doc.text('FACTURE', marginX, y);
   y += 6;
