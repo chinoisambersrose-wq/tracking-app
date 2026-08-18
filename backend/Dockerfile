@@ -1,21 +1,16 @@
-FROM node:20-alpine AS base
-# openssl est requis par les binaires moteur de Prisma (schema-engine/query-engine),
-# absent par défaut de l'image alpine.
-RUN apk add --no-cache openssl
+FROM node:20-slim AS base
 WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npx prisma generate
 RUN npm run build
-# Diagnostic : fait échouer le build explicitement (avec un message clair)
-# si la compilation n'a pas produit dist/main.js, au lieu de laisser une
-# image cassée passer silencieusement.
 RUN ls -la dist && test -f dist/main.js || (echo "ERREUR: dist/main.js absent après npm run build" && exit 1)
 
-FROM node:20-alpine
-RUN apk add --no-cache openssl
+FROM node:20-slim
 WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/prisma ./prisma

@@ -37,4 +37,7 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Backend démarré sur http://localhost:${port}/api`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Erreur au démarrage du backend:', err);
+  process.exit(1);
+});
