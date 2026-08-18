@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+import { writeSync } from 'fs';
+writeSync(1, '>>> [boot] main.js chargé\n');
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
@@ -6,7 +8,9 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
+  writeSync(1, '>>> [boot] bootstrap() début\n');
   const app = await NestFactory.create(AppModule);
+  writeSync(1, '>>> [boot] Nest app créée\n');
 
   app.use(cookieParser());
 
@@ -35,9 +39,10 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`Backend démarré sur http://localhost:${port}/api`);
+  writeSync(1, `>>> [boot] Backend démarré sur le port ${port}\n`);
 }
+
 bootstrap().catch((err) => {
-  console.error('Erreur au démarrage du backend:', err);
+  writeSync(2, '>>> [boot] ERREUR: ' + (err && err.stack ? err.stack : String(err)) + '\n');
   process.exit(1);
 });
