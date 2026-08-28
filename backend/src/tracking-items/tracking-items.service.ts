@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { NotificationChannel } from '@prisma/client';
+import { NotificationChannel, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
@@ -90,7 +90,7 @@ export class TrackingItemsService {
         label: dto.label,
         currentStatus: dto.initialStatus,
         assignedAgentId: dto.assignedAgentId,
-        metadata,
+        metadata: metadata as unknown as Prisma.InputJsonValue,
         publicCode: generatePublicCode(),
       },
     });
@@ -170,7 +170,7 @@ export class TrackingItemsService {
 
     const updated = await this.prisma.trackingItem.update({
       where: { id },
-      data: { metadata: merged },
+      data: { metadata: merged as unknown as Prisma.InputJsonValue },
     });
 
     await this.auditLog.log(actorId, 'TRACKING_ITEM_METADATA_UPDATED', 'TrackingItem', id);
