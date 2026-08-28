@@ -6,6 +6,7 @@ import { extractErrorMessages } from '../../lib/errors';
 import { MapView, MapMarker } from '../../components/MapView';
 import { generateInvoicePdf } from '../../lib/invoice';
 import { useI18n } from '../../lib/i18n';
+import { useSimulatedPosition, formatEta } from '../../lib/journey';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 
 interface TrackingItemMetadata {
@@ -42,6 +43,15 @@ interface TrackingItemMetadata {
   pickupTime?: string;
   departureTime?: string;
   comments?: string;
+  // --- Trajet simulé ---
+  originLat?: number;
+  originLng?: number;
+  destinationLat?: number;
+  destinationLng?: number;
+  journeySpeedKmh?: number;
+  departureAt?: string;
+  arrivalAt?: string;
+  journeyDistanceKm?: number;
 }
 
 const SHIPMENT_MODES = ['Route', 'Maritime', 'Aérien'];
@@ -230,6 +240,128 @@ function MetadataFields({ type, defaults }: { type: 'PARCEL' | 'VEHICLE'; defaul
   );
 }
 
+/** Convertit un ISO stocké en valeur pour <input type="datetime-local"> (heure locale, sans "Z"). */
+function toLocalInputValue(iso?: string): string {
+  const d = iso ? new Date(iso) : new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+interface JourneyDraft {
+  originLat?: number;
+  originLng?: number;
+  destinationLat?: number;
+  destinationLng?: number;
+}
+
+/**
+ * Bloc "trajet simulé" de la fiche colis : deux boutons pour choisir le
+ * départ et l'arrivée en cliquant sur la carte partagée, une vitesse en
+ * km/h et une heure de départ. Les coordonnées choisies transitent par des
+ * champs cachés pour être soumises avec le reste du formulaire de métadonnées.
+ * N'est affiché que sur un élément déjà créé (il faut un id pour cliquer-placer).
+ */
+function JourneyFields({
+  defaults,
+  picking,
+  draft,
+  onPick,
+  onClear,
+}: {
+  defaults?: TrackingItemMetadata;
+  picking: 'origin' | 'destination' | null;
+  draft?: JourneyDraft;
+  onPick: (field: 'origin' | 'destination') => void;
+  onClear: () => void;
+}) {
+  const { t } = useI18n();
+  const originLat = draft?.originLat ?? defaults?.originLat;
+  const originLng = draft?.originLng ?? defaults?.originLng;
+  const destinationLat = draft?.destinationLat ?? defaults?.destinationLat;
+  const destinationLng = draft?.destinationLng ?? defaults?.destinationLng;
+  const hasAny =
+    originLat !== undefined || destinationLat !== undefined || defaults?.journeySpeedKmh !== undefined;
+
+  return (
+    <div className="space-y-2 border-t border-dashed pt-2">
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">{t('admin.md.journeyTitle')}</p>
+
+      <input type="hidden" name="originLat" value={originLat ?? ''} />
+      <input type="hidden" name="originLng" value={originLng ?? ''} />
+      <input type="hidden" name="destinationLat" value={destinationLat ?? ''} />
+      <input type="hidden" name="destinationLng" value={destinationLng ?? ''} />
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => onPick('origin')}
+          className={`rounded border px-2 py-1.5 text-left text-xs ${
+            picking === 'origin' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'text-blue-600'
+          }`}
+        >
+          {picking === 'origin' ? t('admin.md.pickOriginActive') : t('admin.md.pickOrigin')}
+          {originLat !== undefined && originLng !== undefined && (
+            <span className="mt-0.5 block text-[11px] text-gray-500">
+              {t('admin.md.originChosen')} {originLat.toFixed(4)}, {originLng.toFixed(4)}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => onPick('destination')}
+          className={`rounded border px-2 py-1.5 text-left text-xs ${
+            picking === 'destination' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'text-blue-600'
+          }`}
+        >
+          {picking === 'destination' ? t('admin.md.pickDestinationActive') : t('admin.md.pickDestination')}
+          {destinationLat !== undefined && destinationLng !== undefined && (
+            <span className="mt-0.5 block text-[11px] text-gray-500">
+              {t('admin.md.destinationChosen')} {destinationLat.toFixed(4)}, {destinationLng.toFixed(4)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          name="journeySpeedKmh"
+          type="number"
+          step="0.1"
+          min={0}
+          defaultValue={defaults?.journeySpeedKmh}
+          placeholder={t('admin.md.journeySpeed')}
+          className="rounded border px-2 py-1.5 text-sm"
+        />
+        <input
+          name="departureAtLocal"
+          type="datetime-local"
+          defaultValue={toLocalInputValue(defaults?.departureAt)}
+          title={t('admin.md.journeyDeparture')}
+          className="rounded border px-2 py-1.5 text-sm"
+        />
+      </div>
+
+      {hasAny && (
+        <button type="button" onClick={onClear} className="text-[11px] text-red-600 hover:underline">
+          {t('admin.md.journeyClear')}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Petit badge affiché sur la fiche colis quand un trajet simulé est actif. */
+function JourneyStatusBadge({ metadata }: { metadata?: TrackingItemMetadata | null }) {
+  const { t } = useI18n();
+  const simulated = useSimulatedPosition(metadata);
+  if (!simulated) return null;
+  return (
+    <div className={`mt-1 text-xs font-medium ${simulated.arrived ? 'text-emerald-600' : 'text-blue-600'}`}>
+      {simulated.arrived ? `📍 ${t('track.journeyArrived')}` : `🚚 ${t('track.journeyEta')} ${formatEta(simulated.etaMinutes)}`}
+    </div>
+  );
+}
+
 /** Lit le formulaire et ne garde que les champs de métadonnées non vides. */
 function readMetadataFromForm(form: FormData): TrackingItemMetadata {
   const metadata: TrackingItemMetadata = {};
@@ -276,6 +408,17 @@ function readMetadataFromForm(form: FormData): TrackingItemMetadata {
   str('comments');
   metadata.fragile = form.get('fragile') === 'on';
 
+  num('originLat');
+  num('originLng');
+  num('destinationLat');
+  num('destinationLng');
+  num('journeySpeedKmh');
+  const departureAtLocal = form.get('departureAtLocal');
+  if (departureAtLocal && String(departureAtLocal).trim() !== '') {
+    const dt = new Date(String(departureAtLocal));
+    if (!isNaN(dt.getTime())) metadata.departureAt = dt.toISOString();
+  }
+
   return metadata;
 }
 
@@ -296,6 +439,10 @@ export default function AdminDashboard() {
   const [editFormErrors, setEditFormErrors] = useState<string[]>([]);
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const [copiedItemId, setCopiedItemId] = useState<string | null>(null);
+  const [journeyPicking, setJourneyPicking] = useState<{ itemId: string; field: 'origin' | 'destination' } | null>(
+    null,
+  );
+  const [journeyDrafts, setJourneyDrafts] = useState<Record<string, JourneyDraft>>({});
 
   async function loadItems() {
     const { data } = await api.get<TrackingItem[]>('/tracking-items');
@@ -346,6 +493,10 @@ export default function AdminDashboard() {
     try {
       await api.patch(`/tracking-items/${itemId}/metadata`, readMetadataFromForm(form));
       setEditingItemId(null);
+      setJourneyDrafts((cur) => {
+        const { [itemId]: _removed, ...rest } = cur;
+        return rest;
+      });
       await loadItems();
     } catch (err) {
       setEditFormErrors(extractErrorMessages(err));
@@ -355,6 +506,7 @@ export default function AdminDashboard() {
   }
 
   function startPickingPosition(itemId: string) {
+    setJourneyPicking(null);
     setPickingItemId(itemId);
     setPendingPosition(null);
     setPositionError(null);
@@ -366,7 +518,31 @@ export default function AdminDashboard() {
     setPositionError(null);
   }
 
+  function startJourneyPicking(itemId: string, field: 'origin' | 'destination') {
+    cancelPickingPosition();
+    setJourneyPicking({ itemId, field });
+  }
+
+  function clearJourneyDraft(itemId: string) {
+    setJourneyDrafts((cur) => ({
+      ...cur,
+      [itemId]: { originLat: undefined, originLng: undefined, destinationLat: undefined, destinationLng: undefined },
+    }));
+  }
+
   function handleMapClick(lat: number, lng: number) {
+    if (journeyPicking) {
+      const { itemId, field } = journeyPicking;
+      setJourneyDrafts((cur) => ({
+        ...cur,
+        [itemId]: {
+          ...cur[itemId],
+          ...(field === 'origin' ? { originLat: lat, originLng: lng } : { destinationLat: lat, destinationLng: lng }),
+        },
+      }));
+      setJourneyPicking(null);
+      return;
+    }
     if (!pickingItemId) return;
     setPendingPosition({ lat, lng });
   }
@@ -544,11 +720,14 @@ export default function AdminDashboard() {
                     onClick={() => {
                       setEditingItemId(editingItemId === item.id ? null : item.id);
                       setEditFormErrors([]);
+                      setJourneyPicking(null);
                     }}
                     className="mt-1 block text-xs text-blue-600 hover:underline"
                   >
                     {editingItemId === item.id ? t('admin.close') : t('admin.editInfo')}
                   </button>
+
+                  <JourneyStatusBadge metadata={item.metadata} />
 
                   <button
                     onClick={() => generateInvoicePdf(item)}
@@ -580,6 +759,13 @@ export default function AdminDashboard() {
                         </ul>
                       )}
                       <MetadataFields type={item.type} defaults={item.metadata ?? undefined} />
+                      <JourneyFields
+                        defaults={item.metadata ?? undefined}
+                        picking={journeyPicking?.itemId === item.id ? journeyPicking.field : null}
+                        draft={journeyDrafts[item.id]}
+                        onPick={(field) => startJourneyPicking(item.id, field)}
+                        onClear={() => clearJourneyDraft(item.id)}
+                      />
                       <button
                         type="submit"
                         disabled={submittingEdit}
@@ -596,6 +782,16 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="col-span-2 flex h-[600px] flex-col gap-2">
+          {journeyPicking && (
+            <div className="flex items-center justify-between rounded border border-blue-300 bg-blue-50 p-2 text-sm">
+              <span>
+                {journeyPicking.field === 'origin' ? t('admin.md.pickOriginActive') : t('admin.md.pickDestinationActive')}
+              </span>
+              <button onClick={() => setJourneyPicking(null)} className="rounded border px-3 py-1 text-gray-600">
+                {t('admin.cancel')}
+              </button>
+            </div>
+          )}
           {pickingItemId && (
             <div className="flex items-center justify-between rounded border border-orange-300 bg-orange-50 p-2 text-sm">
               <span>
@@ -621,7 +817,11 @@ export default function AdminDashboard() {
             </div>
           )}
           <div className="flex-1">
-            <MapView markers={markers} onMapClick={pickingItemId ? handleMapClick : undefined} pendingMarker={pendingPosition} />
+            <MapView
+              markers={markers}
+              onMapClick={pickingItemId || journeyPicking ? handleMapClick : undefined}
+              pendingMarker={pendingPosition}
+            />
           </div>
         </div>
       </div>

@@ -59,6 +59,19 @@ export const trackingItemMetadataSchema = z
     pickupTime: z.string().max(10).optional(),
     departureTime: z.string().max(10).optional(),
     comments: z.string().max(500).optional(), // remarque publique (ex: consignes de livraison)
+
+    // --- Trajet simulé (le colis se déplace sur la carte du point de départ
+    // vers le point d'arrivée, à la vitesse choisie par l'admin). journeyDistanceKm
+    // et arrivalAt sont recalculés côté serveur à chaque écriture : toute valeur
+    // envoyée par le client pour ces deux champs est ignorée (voir tracking-items.service.ts).
+    originLat: z.number().min(-90).max(90).optional(),
+    originLng: z.number().min(-180).max(180).optional(),
+    destinationLat: z.number().min(-90).max(90).optional(),
+    destinationLng: z.number().min(-180).max(180).optional(),
+    journeySpeedKmh: z.number().positive().max(2000).optional(),
+    departureAt: z.string().min(1).optional(), // ISO 8601
+    arrivalAt: z.string().min(1).optional(), // calculé par le serveur
+    journeyDistanceKm: z.number().nonnegative().optional(), // calculé par le serveur
   })
   .partial();
 
@@ -97,6 +110,14 @@ export const PUBLIC_METADATA_FIELDS = [
   'pickupTime',
   'departureTime',
   'comments',
+  'originLat',
+  'originLng',
+  'destinationLat',
+  'destinationLng',
+  'journeySpeedKmh',
+  'departureAt',
+  'arrivalAt',
+  'journeyDistanceKm',
 ] as const;
 
 export function toPublicMetadata(metadata: unknown): Partial<TrackingItemMetadata> {

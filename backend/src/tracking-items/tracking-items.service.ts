@@ -13,6 +13,62 @@ function generatePublicCode(): string {
   return `TRK-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
+const EARTH_RADIUS_KM = 6371;
+
+function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/**
+ * Si les métadonnées contiennent un trajet simulé complet (origine,
+ * destination, vitesse, heure de départ), (re)calcule la distance et l'heure
+ * d'arrivée estimées à partir de ces valeurs. `journeyDistanceKm` et
+ * `arrivalAt` ne sont donc jamais pris tels quels depuis le client : ils sont
+ * toujours dérivés côté serveur pour rester cohérents avec les coordonnées
+ * et la vitesse effectivement enregistrées.
+ */
+function withComputedJourney(metadata: Record<string, unknown>): Record<string, unknown> {
+  const originLat = metadata.originLat;
+  const originLng = metadata.originLng;
+  const destinationLat = metadata.destinationLat;
+  const destinationLng = metadata.destinationLng;
+  const journeySpeedKmh = metadata.journeySpeedKmh;
+  const departureAt = metadata.departureAt;
+
+  const hasJourney =
+    typeof originLat === 'number' &&
+    typeof originLng === 'number' &&
+    typeof destinationLat === 'number' &&
+    typeof destinationLng === 'number' &&
+    typeof journeySpeedKmh === 'number' &&
+    journeySpeedKmh > 0 &&
+    typeof departureAt === 'string' &&
+    !isNaN(new Date(departureAt).getTime());
+
+  if (!hasJourney) return metadata;
+
+  const distanceKm = haversineDistanceKm(
+    originLat as number,
+    originLng as number,
+    destinationLat as number,
+    destinationLng as number,
+  );
+  const departure = new Date(departureAt as string);
+  const hours = distanceKm / (journeySpeedKmh as number);
+  const arrival = new Date(departure.getTime() + hours * 3_600_000);
+
+  return {
+    ...metadata,
+    journeyDistanceKm: Math.round(distanceKm * 100) / 100,
+    arrivalAt: arrival.toISOString(),
+  };
+}
+
 @Injectable()
 export class TrackingItemsService {
   constructor(
@@ -23,6 +79,10 @@ export class TrackingItemsService {
   ) {}
 
   async create(dto: CreateTrackingItemDto, organizationId: string, actorId: string) {
+    const metadata = dto.metadata
+      ? withComputedJourney(dto.metadata as Record<string, unknown>)
+      : dto.metadata;
+
     const item = await this.prisma.trackingItem.create({
       data: {
         organizationId,
@@ -30,7 +90,7 @@ export class TrackingItemsService {
         label: dto.label,
         currentStatus: dto.initialStatus,
         assignedAgentId: dto.assignedAgentId,
-        metadata: dto.metadata,
+        metadata,
         publicCode: generatePublicCode(),
       },
     });
@@ -103,7 +163,10 @@ export class TrackingItemsService {
     const item = await this.prisma.trackingItem.findFirst({ where: { id, organizationId } });
     if (!item) throw new NotFoundException('Élément de tracking introuvable.');
 
-    const merged = { ...((item.metadata as Record<string, unknown>) ?? {}), ...metadata };
+    const merged = withComputedJourney({
+      ...((item.metadata as Record<string, unknown>) ?? {}),
+      ...metadata,
+    });
 
     const updated = await this.prisma.trackingItem.update({
       where: { id },

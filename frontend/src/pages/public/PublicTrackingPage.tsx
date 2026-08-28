@@ -1,9 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api';
-import { MapView } from '../../components/MapView';
+import { MapView, MapMarker } from '../../components/MapView';
 import { useI18n } from '../../lib/i18n';
 import { useDynamicTranslation } from '../../lib/useDynamicTranslation';
+import { useSimulatedPosition, formatEta } from '../../lib/journey';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { Logo } from '../../components/Logo';
 import {
@@ -48,6 +49,15 @@ interface TrackingDetails {
   pickupTime?: string;
   departureTime?: string;
   comments?: string;
+  // --- Trajet simulé ---
+  originLat?: number;
+  originLng?: number;
+  destinationLat?: number;
+  destinationLng?: number;
+  journeySpeedKmh?: number;
+  departureAt?: string;
+  arrivalAt?: string;
+  journeyDistanceKm?: number;
 }
 
 interface TrackingResult {
@@ -129,6 +139,7 @@ export default function PublicTrackingPage() {
   }
 
   const d = result?.details;
+  const simulated = useSimulatedPosition(d);
   const hasPackage = !!(d && (d.category || d.description || d.weightKg || d.lengthCm));
   const hasShipment = !!(
     d &&
@@ -402,26 +413,76 @@ export default function PublicTrackingPage() {
             </div>
 
             {/* Map */}
-            {result.lastPosition && (
+            {(simulated || result.lastPosition) && (
               <div className="overflow-hidden rounded-2xl bg-white shadow-card">
-                <h2 className="flex items-center gap-2 px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
-                  <MapPinIcon className="h-4 w-4" /> {t('track.currentPosition')}
-                </h2>
-                <div className="mt-4 h-96">
-                  <MapView
-                    markers={[
-                      {
-                        id: result.publicCode,
-                        lat: result.lastPosition.latitude,
-                        lng: result.lastPosition.longitude,
-                        label: result.label ?? result.publicCode,
-                        status: result.currentStatus,
-                      },
-                    ]}
-                    center={[result.lastPosition.latitude, result.lastPosition.longitude]}
-                    zoom={12}
-                  />
+                <div className="flex flex-wrap items-center justify-between gap-2 px-6 pt-6">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-ink-700/60">
+                    <MapPinIcon className="h-4 w-4" /> {t('track.currentPosition')}
+                  </h2>
+                  {simulated && (
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        simulated.arrived ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {simulated.arrived
+                        ? t('track.journeyArrived')
+                        : `${t('track.journeyEta')} ${formatEta(simulated.etaMinutes)}`}
+                    </span>
+                  )}
                 </div>
+                <div className="mt-4 h-96">
+                  {simulated ? (
+                    <MapView
+                      markers={
+                        [
+                          { id: 'origin', lat: d!.originLat!, lng: d!.originLng!, label: t('track.journeyOrigin'), variant: 'origin' },
+                          {
+                            id: 'destination',
+                            lat: d!.destinationLat!,
+                            lng: d!.destinationLng!,
+                            label: t('track.journeyDestination'),
+                            variant: 'destination',
+                          },
+                          {
+                            id: result.publicCode,
+                            lat: simulated.lat,
+                            lng: simulated.lng,
+                            label: result.label ?? result.publicCode,
+                            status: result.currentStatus,
+                            variant: 'moving',
+                          },
+                        ] as MapMarker[]
+                      }
+                      route={[
+                        { lat: d!.originLat!, lng: d!.originLng! },
+                        { lat: d!.destinationLat!, lng: d!.destinationLng! },
+                      ]}
+                      center={[simulated.lat, simulated.lng]}
+                      zoom={10}
+                    />
+                  ) : (
+                    <MapView
+                      markers={[
+                        {
+                          id: result.publicCode,
+                          lat: result.lastPosition!.latitude,
+                          lng: result.lastPosition!.longitude,
+                          label: result.label ?? result.publicCode,
+                          status: result.currentStatus,
+                        },
+                      ]}
+                      center={[result.lastPosition!.latitude, result.lastPosition!.longitude]}
+                      zoom={12}
+                    />
+                  )}
+                </div>
+                {simulated && d?.journeySpeedKmh !== undefined && (
+                  <p className="px-6 pb-4 pt-2 text-xs text-ink-700/50">
+                    {t('track.journeySpeed')} {d.journeySpeedKmh} km/h
+                    {d.journeyDistanceKm !== undefined && ` · ${t('track.journeyDistance')} ${d.journeyDistanceKm} km`}
+                  </p>
+                )}
               </div>
             )}
 
