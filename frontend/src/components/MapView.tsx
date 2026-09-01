@@ -9,6 +9,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
+/**
+ * Icône par défaut EXPLICITE (pin bleu standard).
+ *
+ * IMPORTANT : ne jamais passer `icon={undefined}` à <Marker>. react-leaflet
+ * transmet la clé `icon` telle quelle à L.Util.setOptions, qui écrase alors
+ * l'icône par défaut de Leaflet avec `undefined`. Leaflet appelle ensuite
+ * `this.options.icon.createIcon(...)` et lève :
+ *   TypeError: Cannot read properties of undefined (reading 'createIcon')
+ * L'exception remonte dans React, l'arbre est démonté → page blanche.
+ * On fournit donc toujours une instance d'icône valide.
+ */
+const DEFAULT_ICON = new L.Icon.Default();
+
 // Icône distincte (pastille orange) pour la position en cours de sélection,
 // pas encore enregistrée, afin de la différencier des positions confirmées.
 // On utilise un divIcon (CSS pur) plutôt qu'une image externe pour éviter
@@ -41,11 +54,28 @@ const movingIcon = L.divIcon({
   iconAnchor: [14, 14],
 });
 
-const VARIANT_ICONS = {
+const VARIANT_ICONS: Record<string, L.Icon | L.DivIcon> = {
+  default: DEFAULT_ICON,
   origin: originIcon,
   destination: destinationIcon,
   moving: movingIcon,
-} as const;
+};
+
+/** Retourne toujours une icône valide, quelle que soit la valeur reçue. */
+function resolveIcon(variant?: string | null): L.Icon | L.DivIcon {
+  if (!variant) return DEFAULT_ICON;
+  const key = String(variant).trim().toLowerCase();
+  return VARIANT_ICONS[key] ?? DEFAULT_ICON;
+}
+
+/** Vérifie qu'un couple de coordonnées est réellement exploitable par Leaflet. */
+function isValidLatLng(lat: unknown, lng: unknown): boolean {
+  const la = Number(lat);
+  const ln = Number(lng);
+  return (
+    Number.isFinite(la) && Number.isFinite(ln) && la >= -90 && la <= 90 && ln >= -180 && ln <= 180
+  );
+}
 
 export interface MapMarker {
   id: string;
@@ -84,9 +114,19 @@ export function MapView({
   /** Ligne pointillée reliant deux points ou plus (ex : trajet départ → arrivée). */
   route?: { lat: number; lng: number }[];
 }) {
+  // On écarte silencieusement les marqueurs dont les coordonnées sont absentes,
+  // nulles ou non numériques : Leaflet planterait au montage.
+  const safeMarkers = (markers ?? []).filter((m) => m && isValidLatLng(m.lat, m.lng));
+  const safeRoute = (route ?? []).filter((p) => p && isValidLatLng(p.lat, p.lng));
+  const safeCenter: [number, number] = isValidLatLng(center?.[0], center?.[1])
+    ? [Number(center[0]), Number(center[1])]
+    : [4.0511, 9.7679];
+  const safePending =
+    pendingMarker && isValidLatLng(pendingMarker.lat, pendingMarker.lng) ? pendingMarker : null;
+
   return (
     <MapContainer
-      center={center}
+      center={safeCenter}
       zoom={zoom}
       className={`h-full w-full rounded-lg ${onMapClick ? 'cursor-crosshair' : ''}`}
     >
@@ -95,17 +135,17 @@ export function MapView({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {onMapClick && <ClickHandler onClick={onMapClick} />}
-      {route && route.length >= 2 && (
+      {safeRoute.length >= 2 && (
         <Polyline
-          positions={route.map((p) => [p.lat, p.lng])}
+          positions={safeRoute.map((p) => [Number(p.lat), Number(p.lng)] as [number, number])}
           pathOptions={{ color: '#2563eb', weight: 3, dashArray: '6 8', opacity: 0.7 }}
         />
       )}
-      {markers.map((m) => (
+      {safeMarkers.map((m) => (
         <Marker
           key={m.id}
-          position={[m.lat, m.lng]}
-          icon={m.variant && m.variant !== 'default' ? VARIANT_ICONS[m.variant] : undefined}
+          position={[Number(m.lat), Number(m.lng)]}
+          icon={resolveIcon(m.variant)}
         >
           <Popup>
             <strong>{m.label}</strong>
@@ -113,8 +153,8 @@ export function MapView({
           </Popup>
         </Marker>
       ))}
-      {pendingMarker && (
-        <Marker position={[pendingMarker.lat, pendingMarker.lng]} icon={pendingIcon}>
+      {safePending && (
+        <Marker position={[Number(safePending.lat), Number(safePending.lng)]} icon={pendingIcon}>
           <Popup>Nouvelle position (non enregistrée)</Popup>
         </Marker>
       )}
