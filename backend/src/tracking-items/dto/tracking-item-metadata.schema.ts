@@ -55,6 +55,7 @@ export const trackingItemMetadataSchema = z
     originCity: z.string().max(120).optional(),
     destinationCity: z.string().max(120).optional(),
     expectedDeliveryDate: z.string().max(20).optional(), // ISO date (YYYY-MM-DD)
+    arrivalDate: z.string().max(20).optional(), // ISO date (YYYY-MM-DD)
     pickupDate: z.string().max(20).optional(),
     pickupTime: z.string().max(10).optional(),
     departureTime: z.string().max(10).optional(),
@@ -106,6 +107,7 @@ export const PUBLIC_METADATA_FIELDS = [
   'originCity',
   'destinationCity',
   'expectedDeliveryDate',
+  'arrivalDate',
   'pickupDate',
   'pickupTime',
   'departureTime',

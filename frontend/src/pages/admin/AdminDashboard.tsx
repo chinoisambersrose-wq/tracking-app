@@ -39,6 +39,7 @@ interface TrackingItemMetadata {
   originCity?: string;
   destinationCity?: string;
   expectedDeliveryDate?: string;
+  arrivalDate?: string;
   pickupDate?: string;
   pickupTime?: string;
   departureTime?: string;
@@ -138,6 +139,7 @@ function ShipmentFields({ defaults }: { defaults?: TrackingItemMetadata }) {
         <input name="pickupDate" type="date" defaultValue={defaults?.pickupDate} className="rounded border px-2 py-1.5 text-sm" title="Date de ramassage" />
         <input name="pickupTime" type="time" defaultValue={defaults?.pickupTime} className="rounded border px-2 py-1.5 text-sm" title="Heure de ramassage" />
         <input name="departureTime" type="time" defaultValue={defaults?.departureTime} className="rounded border px-2 py-1.5 text-sm" title="Heure de départ" />
+        <input name="arrivalDate" type="date" defaultValue={defaults?.arrivalDate} className="rounded border px-2 py-1.5 text-sm" title="Date d'arrivée" />
       </div>
       <textarea
         name="comments"
@@ -402,6 +404,7 @@ function readMetadataFromForm(form: FormData): TrackingItemMetadata {
   str('originCity');
   str('destinationCity');
   str('expectedDeliveryDate');
+  str('arrivalDate');
   str('pickupDate');
   str('pickupTime');
   str('departureTime');

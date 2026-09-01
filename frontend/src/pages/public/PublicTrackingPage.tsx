@@ -45,6 +45,7 @@ interface TrackingDetails {
   originCity?: string;
   destinationCity?: string;
   expectedDeliveryDate?: string;
+  arrivalDate?: string;
   pickupDate?: string;
   pickupTime?: string;
   departureTime?: string;
@@ -306,6 +307,7 @@ export default function PublicTrackingPage() {
                   <InfoCell label={t('track.paymentMode')} value={translate(d?.paymentMode)} />
                   <InfoCell label={t('track.totalFreight')} value={d?.totalFreight !== undefined ? `${d.totalFreight.toFixed(2)} €` : undefined} />
                   <InfoCell label={t('track.expectedDelivery')} value={d?.expectedDeliveryDate} />
+                  <InfoCell label={t('track.arrivalDate')} value={d?.arrivalDate} />
                   <InfoCell label={t('track.pickupDate')} value={d?.pickupDate} />
                   <InfoCell label={t('track.pickupTime')} value={d?.pickupTime} />
                   <InfoCell label={t('track.departureTime')} value={d?.departureTime} />
